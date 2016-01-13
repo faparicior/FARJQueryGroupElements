@@ -1,303 +1,324 @@
-$(function() {
+;(function(window, jQuery, undefined) {
+    'use strict';
 
-    // Initial values
-    var values =
-        '{ "group_categories" : [' +
-        '{ "id":"1" , "desc":"Alimentacion" },' +
-        '{ "id":"4" , "desc":"Servicios profesionales" },' +
-        '{ "id":"5" , "desc":"Salud" } ],' +
-        '  "free_categories" : [' +
-        '{ "id":"7" , "desc":"Farmacia" },' +
-        '{ "id":"8" , "desc":"Optica" },' +
-        '{ "id":"9" , "desc":"Parafarmacia" } ],' +
-        '  "categories" : [' +
-        '{ "id":"1" , "desc":"Ferreteria", "relId": "1" },' +
-        '{ "id":"4" , "desc":"Supermercado", "relId": "1" },' +
-        '{ "id":"5" , "desc":"Bar / Restaurante", "relId": "4" } ]}'
-        ;
+    var defaults = {
+            'version'              : '1.0',
+            'template' : { // HTML segments
+                'element_master'  : '<span class="display" id="newElementMaster" contenteditable="true">Add new</span>',
+                'element'         : '<span class="display" id="newElement" contenteditable="true">Add new</span>',
+                'element_free'    : '<span class="display" id="newFreeElement" contenteditable="true">Add new</span>',
+                'edit_element'    : '<span class="fa fa-pencil display-edit "></span>',
+                'close_element'   : '<span class="fa fa-times display-close close-element"></span>',
+                'assign_element'  : '<span class="fa fa-tag display-tag "></span>'
+            },
+            'demo_values': JSON.parse(
+                '{ "group_categories" : [' +
+                '{ "id":"1" , "desc":"Alimentacion" },' +
+                '{ "id":"4" , "desc":"Servicios profesionales" },' +
+                '{ "id":"5" , "desc":"Salud" } ],' +
+                '  "free_categories" : [' +
+                '{ "id":"7" , "desc":"Farmacia" },' +
+                '{ "id":"8" , "desc":"Optica" },' +
+                '{ "id":"9" , "desc":"Parafarmacia" } ],' +
+                '  "categories" : [' +
+                '{ "id":"1" , "desc":"Ferreteria", "relId": "1" },' +
+                '{ "id":"4" , "desc":"Supermercado", "relId": "1" },' +
+                '{ "id":"5" , "desc":"Bar / Restaurante", "relId": "4" } ]}'
+            )
+    },
+    settings = {},
 
-    var obj = JSON.parse(values);
+    methods = {
+        init : function (opts) {
+            return this.each(function () {
+                if ($.isEmptyObject(settings)) {
+                    settings = $.extend(true, defaults, opts);
 
-    //
-    // Constructor
-    //
-    function createElements(obj, idUl, listType) {
+                    // non configurable settings
+                    settings.document = window.document;
+                    settings.$document = $(settings.document);
+                    settings.$window = $(window);
+                    settings.$content_el = $(this);
+                }
+                methods.createElements(settings.demo_values['group_categories'], 'group_categories', 1);
+                methods.createElements(settings.demo_values['categories'], 'categories', 2);
+                methods.createElements(settings.demo_values['free_categories'], 'free_categories', 3);
 
-        constructUlElement(idUl).appendTo('div');
+                //
+                // Event methods
+                //
+                var ulWatcher = jQuery('ul');
+                var groupWatcher = jQuery('#group_categories');
+                var categoriesWatcher = jQuery('#categories');
+                var freeCategoriesWatcher = jQuery('#free_categories');
 
-        $.each(obj, function (i, val) {
-            if(listType == 1) {
-                constructLiElementMaster(val).appendTo('#' + idUl);
-            } else if(listType == 2) {
-                constructLiElement(val).appendTo('#' + idUl);
+                // Enter Key disable edit
+                ulWatcher.on('keypress', '.display', function (e) {
+                    return e.which != 13;
+                });
+
+                // Selected element
+                groupWatcher.on('click', 'li' , methods.groupSelected);
+                categoriesWatcher.on('click', 'li' , methods.categoriesSelected);
+                freeCategoriesWatcher.on('click', 'li' , methods.freeCategoriesSelected);
+
+                // Select child categories from master
+                groupWatcher.on('click focus', '.display', methods.selectChildCategories);
+
+                // Edit element
+                ulWatcher.on('click', '.display-edit', methods.editElement);
+                ulWatcher.on('focusout', '.display', methods.uneditElement);
+                // New element Master
+                ulWatcher.on('focus', '#newElementMaster', methods.newElementMaster);
+                // New element
+                ulWatcher.on('focus', '#newElement', methods.newElement);
+                // New free element
+                ulWatcher.on('focus', '#newFreeElement', methods.newFreeElement);
+                // Tagged free element
+                ulWatcher.on('click', '.display-tag', methods.assignElement);
+                // Remove group categories
+                groupWatcher.on('click', '.close-element', methods.removeMasterElement);
+                // Remove element
+                categoriesWatcher.on('click', '.close-element', methods.removeElement);
+                // Remove free categories
+                freeCategoriesWatcher.on('click', '.close-element', methods.removeFreeElement);
+            });
+        },
+        groupSelected: function () {
+            var id = $(this).data('uid');
+            var spanCategories = $('#categories li span');
+            console.log(id);
+            $(this).closest('ul').attr('data-id-selected', id);
+            spanCategories.filter('[data-relid = "' + id + '"]').closest('li').show();
+            spanCategories.filter('[id = "newElement"]').closest('li').show();
+            $(this).closest('ul').find('.elementSelected').removeClass('elementSelected');
+            $(this).addClass('elementSelected');
+        },
+        categoriesSelected: function () {
+            $(this).closest('ul').find('.elementSelected').removeClass('elementSelected');
+            $(this).addClass('elementSelected');
+        },
+        freeCategoriesSelected: function() {
+            $(this).closest('ul').find('.elementSelected').removeClass('elementSelected');
+            $(this).addClass('elementSelected');
+        },
+        selectChildCategories: function() {
+            var id = $(this).data('uid');
+            var spanCategories = $('#categories li span');
+
+            $(this).closest('ul').attr('data-id-selected', id);
+            spanCategories.closest('li').hide();
+            spanCategories.filter('[data-relid = "' + id + '"]').closest('li').show();
+            spanCategories.filter('[id = "newElement"]').closest('li').show();
+        },
+        editElement: function () {
+            var element = $(this).closest('li').find('.display');
+
+            element.attr('contenteditable', 'true');
+            element.focusin();
+            methods.selectText(element);
+        },
+        uneditElement: function () {
+            $(this).attr('contenteditable', 'false');
+        },
+        assignElement: function () {
+            var element = $(this).closest('li').detach();
+            element.find('.display-tag').remove();
+
+            var idMaster = $('#group_categories').attr('data-id-selected');
+            element.find('.display').attr('data-relid', idMaster);
+            $('#categories').find('#newElement').closest('li').before(element);
+        },
+        newElementMaster: function () {
+            var newElement = methods.template_li_new_item(1);
+            var newEdit = methods.template_edit_element();
+            var newClose = methods.template_close_element();
+            var uid_data = methods.generateUUID();
+
+            $(this).closest('li').find('.display-close ').addClass('close-element');
+            $(this).removeAttr('id');
+            $(this).attr('data-uid',uid_data);
+            $(this).closest('ul').attr('data-id-selected', uid_data);
+
+            $(this).after(newClose);
+            $(this).after(newEdit);
+            methods.selectText($(this));
+            $(this).closest('li').after(newElement);
+        },
+        newElement: function () {
+            var newElement = methods.template_li_new_item(2);
+            var newEdit = methods.template_edit_element();
+            var newClose = methods.template_close_element();
+            var uid_data = methods.generateUUID();
+
+            $(this).closest('li').find('.display-close ').addClass('close-element');
+            $(this).removeAttr('id');
+            $(this).attr('data-uid',uid_data);
+
+            var idMaster = $('#group_categories').attr('data-id-selected');
+            $(this).attr('data-relid',idMaster);
+
+            $(this).after(newClose);
+            $(this).after(newEdit);
+            methods.selectText($(this));
+            $(this).closest('li').after(newElement);
+        },
+        newFreeElement: function () {
+            var newElement = methods.template_li_new_item(3);
+            var newEdit = methods.template_edit_element();
+            var newClose = methods.template_close_element();
+            var uid_data = methods.generateUUID();
+            var newAssign = methods.template_assign_element();
+
+            $(this).closest('li').find('.display-close').addClass('close-element');
+            $(this).removeAttr('id');
+            $(this).attr('data-uid',uid_data);
+
+            $(this).after(newClose);
+            $(this).after(newEdit);
+            $(this).after(newAssign);
+            methods.selectText($(this));
+            $(this).closest('li').after(newElement);
+        },
+        removeElement: function () {
+            var newAssign = methods.template_assign_element();
+            var element = $(this).closest('li').detach();
+
+            element.find('.display').removeAttr('data-relid');
+            element.find('.display').before(newAssign);
+            $('#free_categories').find('#newFreeElement').closest('li').before(element);
+        },
+        removeFreeElement: function () {
+            $(this).closest('li').remove();
+        },
+        removeMasterElement: function () {
+            // TODO: Delete all dependencies
+            var id = $(this).closest('li').find('.display').attr('data-uid');
+            var rels = $('#categories').find('[data-relid = "' + id + '"]');
+            console.log(rels);
+            // TODO-END: Delete all dependencies
+
+//            $(this).closest('li').remove();
+        },
+        template_li_master: function (values) {
+            return $(
+                '<li>' +
+                    '<span class="display" data-uid="' + values.id + '" contenteditable="false">' + values.desc + '</span>' +
+                    settings.template.edit_element +
+                    settings.template.close_element +
+                '</li>'
+            );
+        },
+        template_edit_element: function () {
+            return $(
+                settings.template.edit_element
+            );
+        },
+        template_close_element: function () {
+            return $(
+              settings.template.close_element
+            );
+        },
+        template_assign_element: function () {
+            return $(
+                settings.template.assign_element
+            );
+        },
+        template_li: function (values) {
+            return $(
+                '<li>' +
+                    '<span class="display" data-uid="' + values.id + '" data-relid="' + values.relId + '" contenteditable="false">' + values.desc + '</span>' +
+                    settings.template.edit_element +
+                    settings.template.close_element +
+                '</li>'
+            );
+        },
+        template_li_free: function (values) {
+            return $(
+                '<li>' +
+                settings.template.assign_element +
+                '<span class="display" data-uid="' + values.id + '" data-relid="' + values.relId + '" contenteditable="false">' + values.desc + '</span>' +
+                settings.template.edit_element +
+                settings.template.close_element +
+                '</li>'
+            );
+        },
+        template_li_new_item: function (elementType) {
+            if(elementType == 1) {
+                return $(
+                    '<li>' +
+                    settings.template.element_master +
+                    '</li>'
+                );
+            } else if(elementType == 2) {
+                return $(
+                    '<li>' +
+                    settings.template.element +
+                    '</li>'
+                );
             } else {
-                constructLiFreeElement(val).appendTo('#' + idUl);
+                return $(
+                    '<li>' +
+                    settings.template.element_free +
+                    '</li>'
+                );
             }
-        });
-        constructLiNewItemElement(listType).appendTo('#' + idUl);
-    }
-
-    function constructLiElementMaster(values) {
-        return $(
-            '<li>' +
-            '<span class="display" data-uid="' + values.id + '" contenteditable="false">' + values.desc + '</span>' +
-            '<span class="fa fa-pencil display-edit "></span>' +
-            '<span class="fa fa-times display-close close-element"></span>' +
-            '</li>'
-        );
-    }
-
-    function constructEditElement(values) {
-        return $(
-            '<span class="fa fa-pencil display-edit "></span>'
-        );
-    }
-
-    function constructAssignElement(values) {
-        return $(
-            '<span class="fa fa-tag display-tag "></span>'
-        );
-    }
-
-    function constructLiElement(values) {
-        return $(
-            '<li>' +
-            '<span class="display" data-uid="' + values.id + '" data-relid="' + values.relId + '" contenteditable="false">' + values.desc + '</span>' +
-            '<span class="fa fa-pencil display-edit "></span>' +
-            '<span class="fa fa-times display-close close-element"></span>' +
-            '</li>'
-        );
-    }
-
-    function constructLiFreeElement(values) {
-        return $(
-            '<li>' +
-            '<span class="fa fa-tag display-tag"></span>' +
-            '<span class="display" data-uid="' + values.id + '" data-relid="' + values.relId + '" contenteditable="false">' + values.desc + '</span>' +
-            '<span class="fa fa-pencil display-edit "></span>' +
-            '<span class="fa fa-times display-close close-element"></span>' +
-            '</li>'
-        );
-    }
-
-    function getLiElements() {
-        var liElements = [];
-
-        $('ul').find('.display').not('#newElement').each( function (i, val) {
-            liElements.push({ id: $(val).data('id'), desc: val.innerHTML});
-        });
-
-        return liElements;
-    }
-
-    function constructLiNewItemElement(elementType) {
-        if(elementType == 1) {
+        },
+        template_ul: function (idUl) {
             return $(
-                '<li>' +
-                '<span class="display" id="newElementMaster" contenteditable="true">Add new</span>' +
-                '<span class="fa fa-times display-close "></span>' +
-                '</li>'
+                '<ul id="' + idUl + '">' +
+                '</<ul>'
             );
-        } else if(elementType == 2) {
-            return $(
-                '<li>' +
-                '<span class="display" id="newElement" contenteditable="true">Add new</span>' +
-                '<span class="fa fa-times display-close "></span>' +
-                '</li>'
-            );
+        },
+        createElements: function (obj, idUl, listType) {
+            methods.template_ul(idUl).appendTo('div');
+
+            $.each(obj, function (i, val) {
+                if(listType == 1) {
+                    methods.template_li_master(val).appendTo('#' + idUl);
+                } else if(listType == 2) {
+                    methods.template_li(val).appendTo('#' + idUl);
+                } else {
+                    methods.template_li_free(val).appendTo('#' + idUl);
+                }
+            });
+            methods.template_li_new_item(listType).appendTo('#' + idUl);
+        },
+        generateUUID: function () {
+            var d = new Date().getTime();
+            var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = (d + Math.random()*16)%16 | 0;
+                d = Math.floor(d/16);
+                return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+            });
+            return uuid;
+        },
+        selectText: function (elem) {
+            var doc = document;
+            var element = elem[0];
+
+            if (doc.body.createTextRange) {
+                var range = document.body.createTextRange();
+                range.moveToElementText(element);
+                range.select();
+            } else if (window.getSelection) {
+                var selection = window.getSelection();
+                var range = document.createRange();
+                range.selectNodeContents(element);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+        }
+    };
+
+    $.fn.adminGroupLists = function (method) {
+        if (methods[method]) {
+            return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
+        } else if (typeof method === 'object' || !method) {
+            return methods.init.apply(this, arguments);
         } else {
-            return $(
-                '<li>' +
-                '<span class="display" id="newFreeElement" contenteditable="true">Add new</span>' +
-                '<span class="fa fa-times display-close "></span>' +
-                '</li>'
-            );
-        }
-    }
-
-    function constructUlElement(idUl) {
-        return $(
-            '<ul id="' + idUl + '">' +
-            '</<ul>'
-        );
-    }
-
-
-    //
-    // Auxiliary functions
-    //
-    function generateUUID() {
-        var d = new Date().getTime();
-        var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-            var r = (d + Math.random()*16)%16 | 0;
-            d = Math.floor(d/16);
-            return (c=='x' ? r : (r&0x3|0x8)).toString(16);
-        });
-        return uuid;
-    };
-
-    jQuery.fn.selectText = function(){
-        var doc = document;
-        var element = this[0];
-
-        if (doc.body.createTextRange) {
-            var range = document.body.createTextRange();
-            range.moveToElementText(element);
-            range.select();
-        } else if (window.getSelection) {
-            var selection = window.getSelection();
-            var range = document.createRange();
-            range.selectNodeContents(element);
-            selection.removeAllRanges();
-            selection.addRange(range);
+            $.error('Method ' +  method + ' does not exist on jQuery.joyride');
         }
     };
 
-    // ************ CODE **************
-    // ****
-
-    createElements(obj['group_categories'], 'group_categories', 1);
-    createElements(obj['categories'], 'categories', 2);
-    createElements(obj['free_categories'], 'free_categories', 3);
-
-//    obj.categories = getLiElements('group_categories');
-//    obj.categories = getLiElements('categories');
-
-    // ****
-    // ************ CODE **************
-
-
-    //
-    // Event handlers
-    //
-
-    // Enter Key disable edit
-    $('ul').on('keypress', '.display', function (e) {
-        return e.which != 13;
-    });
-
-    // Selected element
-    $('#group_categories').on('click','li' , function (e) {
-        var id = $(this).data('uid');
-
-        $(this).parent().parent().attr('data-id-selected', id);
-        $('#categories li span').filter('[data-relid = "' + id + '"]').parent().show();
-        $('#categories li span').filter('[id = "newElement"]').parent().show();
-        $(this).closest('ul').find('.elementSelected').removeClass('elementSelected');
-        $(this).addClass('elementSelected');
-    });
-
-    $('#categories').on('click','li' , function (e) {
-        $(this).closest('ul').find('.elementSelected').removeClass('elementSelected');
-        $(this).addClass('elementSelected');
-    });
-
-    $('#free_categories').on('click','li' , function (e) {
-        $(this).closest('ul').find('.elementSelected').removeClass('elementSelected');
-        $(this).addClass('elementSelected');
-    });
-
-
-    // Select child categories from master
-    $('#group_categories').on('click focus','.display' , function (e) {
-        var id = $(this).data('uid');
-
-        $(this).closest('ul').attr('data-id-selected', id);
-        $('#categories li span').parent().hide();
-        $('#categories li span').filter('[data-relid = "' + id + '"]').parent().show();
-        $('#categories li span').filter('[id = "newElement"]').parent().show();
-    });
-
-    // Edit element
-    $('ul').on('click', '.display-edit', function () {
-        $(this).closest('li').find('.display').attr('contenteditable', 'true');
-        $(this).closest('li').find('.display').focusin();
-        $(this).closest('li').find('.display').selectText();
-    });
-
-    $('ul').on('focusout', '.display', function () {
-        $(this).attr('contenteditable', 'false');
-    });
-
-    // New element Master
-    $('ul').on('focus', '#newElementMaster', function () {
-        var newElement = constructLiNewItemElement(1);
-        var newEdit = constructEditElement();
-        var uid_data = generateUUID();
-
-        $(this).parent().find('.display-close ').addClass('close-element');
-        $(this).removeAttr('id');
-        $(this).attr('data-uid',uid_data);
-        $(this).parent().parent().attr('data-id-selected', uid_data);
-        $(this).after(newEdit);
-        $(this).selectText();
-        $(this).parent().after(newElement);
-    });
-
-    // New element
-    $('ul').on('focus', '#newElement', function () {
-        var newElement = constructLiNewItemElement(2);
-        var newEdit = constructEditElement();
-        var uid_data = generateUUID();
-
-        $(this).parent().find('.display-close ').addClass('close-element');
-        $(this).removeAttr('id');
-        $(this).attr('data-uid',uid_data);
-
-        var idMaster = $('#group_categories').attr('data-id-selected');
-        $(this).attr('data-relid',idMaster);
-        $(this).after(newEdit);
-        $(this).selectText();
-        $(this).parent().after(newElement);
-    });
-
-    // New free element
-    $('ul').on('focus', '#newFreeElement', function () {
-        var newElement = constructLiNewItemElement(3);
-        var newEdit = constructEditElement();
-        var newAssign = constructAssignElement();
-        var uid_data = generateUUID();
-
-        $(this).parent().find('.display-close').addClass('close-element');
-        $(this).removeAttr('id');
-        $(this).attr('data-uid',uid_data);
-
-        $(this).after(newEdit);
-        $(this).after(newAssign);
-        $(this).selectText();
-        $(this).parent().after(newElement);
-    });
-
-    // Tagged free element
-    $('ul').on('click', '.display-tag', function () {
-
-        var element = $(this).closest('li').detach();
-        element.find('.display-tag').remove();
-
-        var idMaster = $('#group_categories').attr('data-id-selected');
-        element.find('.display').attr('data-relid', idMaster);
-        $('#categories').find('#newElement').closest('li').before(element);
-    });
-
-    // Remove group categories
-    $('ul#group_categories').on('click', '.close-element', function () {
-        $(this).parent().remove();
-
-        // TODO: Delete all dependencies
-    });
-
-    // Remove element
-    $('ul#categories').on('click', '.close-element', function () {
-        var newAssign = constructAssignElement();
-        var element = $(this).parent().detach();
-        element.find('.display').removeAttr('data-relid');
-        element.find('.display').before(newAssign);
-        $('#free_categories').find('#newFreeElement').closest('li').before(element);
-    });
-
-    // Remove free categories
-    $('ul#free_categories').on('click', '.close-element', function () {
-        $(this).parent().remove();
-    });
-
-});
+})(window, jQuery);
