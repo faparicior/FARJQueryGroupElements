@@ -54,14 +54,14 @@
                     return e.which != 13;
                 });
                 // Selected element
-                settings.ulWatcher.on('click', 'li' , methods.masterSelected);
+                settings.masterWatcher.on('click', 'li' , methods.masterSelected);
                 settings.elementsWatcher.on('click', 'li' , methods.elementsSelected);
                 settings.freeElementsWatcher.on('click', 'li' , methods.freeElementsSelected);
                 // Select child categories from master
                 settings.masterWatcher.on('click focus', 'li', methods.selectChildCategories);
                 // Edit element
                 settings.ulWatcher.on('click', '.display-edit', methods.editElement);
-////                settings.ulWatcher.on('focusout', '.display', methods.uneditElement);
+                settings.ulWatcher.on('focusout', '.display', methods.uneditElement);
                 // New element Master
                 settings.masterWatcher.on('click', '.newElementMaster', methods.newElementMaster);
                 // New element
@@ -80,14 +80,19 @@
         },
         masterSelected: function () {
             var li = $(this);
-            var span = li.find('span');
-            var id = span.data('uid');
+            var id = li.data('uid');
+            var li_child_newelement = settings.elementsWatcher.find('li').filter('.newElement');
 
             settings.masterWatcher.attr('data-id-selected', id);
-            span.filter('[data-relid = "' + id + '"]').closest('li').show();
-            span.filter('[id = "newElement"]').closest('li').show();
             li.closest('ul').find('.elementSelected').removeClass('elementSelected');
             li.addClass('elementSelected');
+
+            // Controls event that shows 'Add new' in element
+            if(li_child_newelement.attr('data-eventhide')){
+                li_child_newelement.removeAttr('data-eventhide');
+            } else {
+                li_child_newelement.show();
+            }
         },
         elementsSelected: function () {
             var li = $(this);
@@ -102,7 +107,8 @@
             li.addClass('elementSelected');
         },
         selectChildCategories: function() {
-            var id = $(this).data('uid');
+            var li = $(this);
+            var id = li.data('uid');
             var ul_master = $(this).closest('ul');
             var li_child = settings.elementsWatcher.find('li');
 
@@ -138,7 +144,6 @@
             var ul = $(this).closest('ul');
             var span = $(this).find('.display');
 
-//            li.find('.display-close ').addClass('close-element');
             li.removeClass('newElementMaster');
             li.attr('data-uid',uid_data);
             ul.attr('data-id-selected', uid_data);
@@ -178,13 +183,12 @@
             var li = $(this).closest('li');
             var span = $(this).find('.display');
 
-            //li.find('.display-close').addClass('close-element');
             li.removeClass('newElementFree');
             $(this).attr('data-uid',uid_data);
 
+            span.before(newAssign);
             span.after(newClose);
             span.after(newEdit);
-            span.after(newAssign);
             methods.selectText(span);
             li.after(newElement);
         },
@@ -195,25 +199,26 @@
             element.find('.display').removeAttr('data-relid');
             element.find('.display').before(newAssign);
             settings.freeElementsWatcher.find('.newElementFree').closest('li').before(element);
-            //$('#free_categories').find('#newFreeElement').closest('li').before(element);
         },
         removeFreeElement: function () {
             $(this).closest('li').remove();
         },
         removeMasterElement: function () {
-            // TODO: Delete all dependencies
-            var id = $(this).closest('li').find('.display').attr('data-uid');
-            var rels = $('#categories').find('[data-relid = "' + id + '"]');
-            var rels_li = rels.closest('li');
+            var li_master = $(this).closest('li');
+            var id = li_master.attr('data-uid');
+            var li_child = settings.elementsWatcher.find('li')
+            var li_child_elements = li_child.filter('[data-relid = "' + id + '"]');
+            var li_child_newelement = li_child.filter('.newElement');
+            var ul_free_elements = settings.freeElementsWatcher;
 
-            rels.removeAttr('data-relid');
-            rels_li.prepend(methods.template_assign_element());
-            rels_li.detach();
-            $('#free_categories').find('#newFreeElement').closest('li').before(rels_li);
-            $(this).closest('li').remove();
-            // TODO: Discover how hide new element
-            $('#categories').find('#newElement').closest('li').hide();
-            // TODO: Discover how hide new element
+            li_child_elements.prepend(methods.template_assign_element());
+            li_child_elements.detach();
+            li_child_newelement.hide();
+
+            ul_free_elements.find('li').filter('.newElementFree').before(li_child_elements);
+            // Controls event that shows 'Add new' in element
+            li_child_newelement.attr('data-eventhide', 'true');
+            li_master.remove();
         },
         template_li_master: function (values) {
             return $(
@@ -299,6 +304,30 @@
             });
             methods.template_li_new_item(listType).appendTo('.' + idUl);
         },
+        getAllElements: function () {
+            var container_el = $('#' + settings.id_container);
+            var json_send = {};
+
+            json_send['far_master_elements'] = methods.getElements(container_el, '.far_master_elements', '.newElementMaster');
+            json_send['far_free_elements'] = methods.getElements(container_el, '.far_free_elements', '.newElementFree');
+            json_send['far_elements'] = methods.getElements(container_el, '.far_elements', '.newElement');
+            console.log(json_send);
+            console.log(JSON.stringify(json_send));
+            return json_send;
+        },
+        getElements: function (container_el, groupElements, classNewElements) {
+            var master = [];
+            var group_elements = container_el.find(groupElements);
+            var elements_each = group_elements.find('li').not(classNewElements);
+            elements_each.each(function() {
+                var element = {};
+                element.id = $(this).attr('data-uid');
+                element.desc = $(this).find('.display').text();
+                master.push(element);
+            });
+
+            return master;
+        },
         generateUUID: function () {
             var d = new Date().getTime();
             var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -332,7 +361,7 @@
         } else if (typeof method === 'object' || !method) {
             return methods.init.apply(this, arguments);
         } else {
-            $.error('Method ' +  method + ' does not exist on jQuery.joyride');
+            $.error('Method ' +  method + ' does not exist on jQuery.adminGroupLists');
         }
     };
 
