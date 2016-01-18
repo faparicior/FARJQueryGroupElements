@@ -24,13 +24,25 @@
 
 </head>
 <body>
-    <div id="demo" class="container-fluid">
+    <div id="demo" class="far-admin-groups">
+        <ul class="far_master_elements"></ul>
+        <ul class="far_elements"></ul>
+        <ul class="far_free_elements"></ul>
     </div>
 
-<script type="text/javascript">
+    <div id="demo2" class="far-admin-groups">
+        <ul class="far_master_elements"></ul>
+        <ul class="far_elements"></ul>
+        <ul class="far_free_elements"></ul>
+    </div>
+
+
+    <script type="text/javascript">
     $(document).ready(function() {
-        $('#demo').adminGroupLists('init');
-        $('#demo').adminGroupLists('getAllElements');
+        $('.far-admin-groups').adminGroupLists('init');
+//        $('#demo').adminGroupLists('getAllElements');
+//        $('#demo2').adminGroupLists('init');
+//        $('#demo2').adminGroupLists('getAllElements');
     });
 </script>
 </body>

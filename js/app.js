@@ -35,6 +35,8 @@
                     settings = $.extend(true, defaults, opts);
                     // non configurable settings
                     settings.$content_el = $(this);
+                    settings.id_content_el = $(this).attr('id');
+                    console.log($(this).attr('id'));
                 }
 
                 methods.createElements(settings.demo_values['far_master_elements'], 'far_master_elements', 1);
@@ -206,7 +208,7 @@
         removeMasterElement: function () {
             var li_master = $(this).closest('li');
             var id = li_master.attr('data-uid');
-            var li_child = settings.elementsWatcher.find('li')
+            var li_child = settings.elementsWatcher.find('li');
             var li_child_elements = li_child.filter('[data-relid = "' + id + '"]');
             var li_child_newelement = li_child.filter('.newElement');
             var ul_free_elements = settings.freeElementsWatcher;
@@ -290,19 +292,24 @@
                 '</<ul>'
             );
         },
-        createElements: function (obj, idUl, listType) {
-            methods.template_ul(idUl).appendTo('div');
+        createElements: function (obj,ulClass, listType) {
+            var ulElement = settings.$content_el.find('.' + ulClass);
+
+            if(!ulElement.length) {
+                ulElement = methods.template_ul(ulClass)
+                ulElement.appendTo('#' + settings.id_content_el);
+            }
 
             $.each(obj, function (i, val) {
                 if(listType == 1) {
-                    methods.template_li_master(val).appendTo('.' + idUl);
+                    methods.template_li_master(val).appendTo(ulElement);
                 } else if(listType == 2) {
-                    methods.template_li(val).appendTo('.' + idUl);
+                    methods.template_li(val).appendTo(ulElement);
                 } else {
-                    methods.template_li_free(val).appendTo('.' + idUl);
+                    methods.template_li_free(val).appendTo(ulElement);
                 }
             });
-            methods.template_li_new_item(listType).appendTo('.' + idUl);
+            methods.template_li_new_item(listType).appendTo(ulElement);
         },
         getAllElements: function () {
             var container_el = $('#' + settings.id_container);
@@ -311,8 +318,8 @@
             json_send['far_master_elements'] = methods.getElements(container_el, '.far_master_elements', '.newElementMaster');
             json_send['far_free_elements'] = methods.getElements(container_el, '.far_free_elements', '.newElementFree');
             json_send['far_elements'] = methods.getElements(container_el, '.far_elements', '.newElement');
-            console.log(json_send);
-            console.log(JSON.stringify(json_send));
+            //console.log(json_send);
+            //console.log(JSON.stringify(json_send));
             return json_send;
         },
         getElements: function (container_el, groupElements, classNewElements) {
