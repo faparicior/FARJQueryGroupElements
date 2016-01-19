@@ -31,13 +31,12 @@
         init : function (opts) {
             return this.each(function () {
 
-                if ($.isEmptyObject(settings)) {
+//                if ($.isEmptyObject(settings)) {
                     settings = $.extend(true, defaults, opts);
                     // non configurable settings
-                    settings.$content_el = $(this);
-                    settings.id_content_el = $(this).attr('id');
-                    console.log($(this).attr('id'));
-                }
+//                }
+                settings.$content_el = $(this);
+                settings.id_content_el = $(this).attr('id');
 
                 methods.createElements(settings.demo_values['far_master_elements'], 'far_master_elements', 1);
                 methods.createElements(settings.demo_values['far_elements'], 'far_elements', 2);
@@ -47,6 +46,8 @@
                 settings.masterWatcher = settings.ulWatcher.filter('.far_master_elements');
                 settings.elementsWatcher = settings.ulWatcher.filter('.far_elements');
                 settings.freeElementsWatcher = settings.ulWatcher.filter('.far_free_elements');
+
+                $(this).data("settings", settings);
 
                 //
                 // Event methods
@@ -82,11 +83,13 @@
         },
         masterSelected: function () {
             var li = $(this);
+            var div = li.closest('div');
+            var ul = li.closest('ul');
             var id = li.data('uid');
-            var li_child_newelement = settings.elementsWatcher.find('li').filter('.newElement');
+            var li_child_newelement = div.find('.far_elements').filter('.newElement');
 
-            settings.masterWatcher.attr('data-id-selected', id);
-            li.closest('ul').find('.elementSelected').removeClass('elementSelected');
+            ul.attr('data-id-selected', id);
+            ul.find('.elementSelected').removeClass('elementSelected');
             li.addClass('elementSelected');
 
             // Controls event that shows 'Add new' in element
@@ -110,9 +113,10 @@
         },
         selectChildCategories: function() {
             var li = $(this);
+            var div = li.closest('div');
+            var ul_master = li.closest('ul');
+            var li_child = div.find('.far_elements').find('li');
             var id = li.data('uid');
-            var ul_master = $(this).closest('ul');
-            var li_child = settings.elementsWatcher.find('li');
 
             ul_master.attr('data-id-selected', id);
             li_child.not('[data-relid = "' + id + '"]').not('.newElement').hide();
@@ -129,12 +133,14 @@
             $(this).attr('contenteditable', 'false');
         },
         assignElement: function () {
-            var element = $(this).closest('li').detach();
-            element.find('.display-tag').remove();
+            var li = $(this).closest('li');
+            var div = li.closest('div');
+            var element = li.detach();
+            var idMaster = div.find('.far_master_elements').attr('data-id-selected');
 
-            var idMaster = settings.masterWatcher.attr('data-id-selected');
+            element.find('.display-tag').remove();
             element.attr('data-relid', idMaster);
-            settings.elementsWatcher.find('.newElement').closest('li').before(element);
+            div.find('.far_elements').find('.newElement').closest('li').before(element);
         },
         newElementMaster: function () {
             var newElement = methods.template_li_new_item(1);
@@ -195,12 +201,14 @@
             li.after(newElement);
         },
         removeElement: function () {
+            var li = $(this).closest('li');
+            var div = li.closest('div');
+            var element = li.detach();
             var newAssign = methods.template_assign_element();
-            var element = $(this).closest('li').detach();
 
             element.find('.display').removeAttr('data-relid');
             element.find('.display').before(newAssign);
-            settings.freeElementsWatcher.find('.newElementFree').closest('li').before(element);
+            div.find('.far_free_elements').find('.newElementFree').closest('li').before(element);
         },
         removeFreeElement: function () {
             $(this).closest('li').remove();
@@ -208,10 +216,14 @@
         removeMasterElement: function () {
             var li_master = $(this).closest('li');
             var id = li_master.attr('data-uid');
-            var li_child = settings.elementsWatcher.find('li');
+            var div = li_master.closest('div');
+            var ul = li_master.closest('ul');
+
+
+            var li_child = div.find('.far_elements').find('li');
             var li_child_elements = li_child.filter('[data-relid = "' + id + '"]');
             var li_child_newelement = li_child.filter('.newElement');
-            var ul_free_elements = settings.freeElementsWatcher;
+            var ul_free_elements = div.find('.far_free_elements');
 
             li_child_elements.prepend(methods.template_assign_element());
             li_child_elements.detach();
