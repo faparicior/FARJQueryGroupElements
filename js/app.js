@@ -86,18 +86,21 @@
             var div = li.closest('div');
             var ul = li.closest('ul');
             var id = li.data('uid');
-            var li_child_newelement = div.find('.far_elements').filter('.newElement');
+            var li_child_newelement = div.find('.far_elements').find('li').filter('.newElement');
 
             ul.attr('data-id-selected', id);
             ul.find('.elementSelected').removeClass('elementSelected');
             li.addClass('elementSelected');
 
             // Controls event that shows 'Add new' in element
+            /*
             if(li_child_newelement.attr('data-eventhide')){
                 li_child_newelement.removeAttr('data-eventhide');
             } else {
                 li_child_newelement.show();
             }
+            */
+            li_child_newelement.show();
         },
         elementsSelected: function () {
             var li = $(this);
@@ -231,7 +234,7 @@
 
             ul_free_elements.find('li').filter('.newElementFree').before(li_child_elements);
             // Controls event that shows 'Add new' in element
-            li_child_newelement.attr('data-eventhide', 'true');
+            //li_child_newelement.attr('data-eventhide', 'true');
             li_master.remove();
         },
         template_li_master: function (values) {
@@ -308,7 +311,7 @@
             var ulElement = settings.$content_el.find('.' + ulClass);
 
             if(!ulElement.length) {
-                ulElement = methods.template_ul(ulClass)
+                ulElement = methods.template_ul(ulClass);
                 ulElement.appendTo('#' + settings.id_content_el);
             }
 
