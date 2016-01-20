@@ -37,23 +37,59 @@
     </div>
 
     <div>
-        <input type="button" onclick="getValues();"/>
-        <input type="button" onclick="getValues2();"/>
+        <button type="button" onclick="getValues();">Demo</button>
+        <button type="button" onclick="getValues2();">Demo2</button>
     </div>
 
     <script type="text/javascript">
         function getValues(){
-            $('#demo').adminGroupLists('getAllElements');
+            var data = $('#demo').adminGroupLists('getAllElements');
+
+            alert(JSON.stringify(data));
         }
         function getValues2(){
-            $('#demo2').adminGroupLists('getAllElements');
+            var data = $('#demo2').adminGroupLists('getAllElements');
+
+            alert(JSON.stringify(data));
         }
 
         $(document).ready(function() {
-            $('.far-admin-groups').adminGroupLists('init');
-    //        $('#demo').adminGroupLists('getAllElements');
-    //        $('#demo2').adminGroupLists('init');
-    //        $('#demo2').adminGroupLists('getAllElements');
+            $.fn.adminGroupLists.defaults.values =  {
+                "far_master_elements": [
+                    {"id": "1", "desc": "Alimentacion"},
+                    {"id": "4", "desc": "Servicios profesionales"},
+                    {"id": "5", "desc": "Salud"}
+                ],
+                "far_free_elements": [
+                    {"id": "7", "desc": "Farmacia"},
+                    {"id": "8", "desc": "Optica"},
+                    {"id": "9", "desc": "Parafarmacia"}
+                ],
+                "far_elements": [
+                    {"id": "1", "desc": "Ferreteria", "relId": "1"},
+                    {"id": "4", "desc": "Supermercado", "relId": "1"},
+                    {"id": "5", "desc": "Bar / Restaurante", "relId": "4"}
+                ]
+            };
+            $('#demo').adminGroupLists('init');
+            $.fn.adminGroupLists.defaults.values =  {
+                "far_master_elements": [
+                    {"id": "1", "desc": "Alimentacion2"},
+                    {"id": "4", "desc": "Servicios profesionales2"},
+                    {"id": "5", "desc": "Salud2"}
+                ],
+                "far_free_elements": [
+                    {"id": "7", "desc": "Farmacia2"},
+                    {"id": "8", "desc": "Optica2"},
+                    {"id": "9", "desc": "Parafarmacia2"}
+                ],
+                "far_elements": [
+                    {"id": "1", "desc": "Ferreteria2", "relId": "1"},
+                    {"id": "4", "desc": "Supermercado2", "relId": "1"},
+                    {"id": "5", "desc": "Bar / Restaurante2", "relId": "4"}
+                ]
+            };
+            $('#demo2').adminGroupLists('init');
         });
 </script>
 </body>

@@ -1,47 +1,24 @@
 ;(function(window, jQuery, undefined) {
     'use strict';
 
-    var defaults = {
-            'version'             : '1.0',
-            'id_container'        : 'demo',
-            'template' : { // HTML segments
-                'new_element'     : '<span class="display" contenteditable="true">Add new</span>',
-                'edit_element'    : '<span class="fa fa-pencil display-edit"></span>',
-                'close_element'   : '<span class="fa fa-times display-close close-element"></span>',
-                'assign_element'  : '<span class="fa fa-tag display-tag"></span>'
-            },
-            'demo_values': JSON.parse(
-                '{ "far_master_elements" : [' +
-                '{ "id":"1" , "desc":"Alimentacion" },' +
-                '{ "id":"4" , "desc":"Servicios profesionales" },' +
-                '{ "id":"5" , "desc":"Salud" } ],' +
-                '  "far_free_elements" : [' +
-                '{ "id":"7" , "desc":"Farmacia" },' +
-                '{ "id":"8" , "desc":"Optica" },' +
-                '{ "id":"9" , "desc":"Parafarmacia" } ],' +
-                '  "far_elements" : [' +
-                '{ "id":"1" , "desc":"Ferreteria", "relId": "1" },' +
-                '{ "id":"4" , "desc":"Supermercado", "relId": "1" },' +
-                '{ "id":"5" , "desc":"Bar / Restaurante", "relId": "4" } ]}'
-            )
-    },
-    settings = {},
+    var settings = {},
 
     methods = {
         init : function (opts) {
             return this.each(function () {
 
 //                if ($.isEmptyObject(settings)) {
-                    settings = $.extend(true, defaults, opts);
+                    settings = $.extend(true, $.fn.adminGroupLists.defaults, opts);
                     // non configurable settings
+                    console.log(settings);
 //                }
                 settings.$content_el = $(this);
                 settings.id_container = $(this).attr('id');
 
-                methods.createElements(settings.demo_values['far_master_elements'], 'far_master_elements', 1);
-                methods.createElements(settings.demo_values['far_elements'], 'far_elements', 2);
-                methods.createElements(settings.demo_values['far_free_elements'], 'far_free_elements', 3);
-                $(this).data("settings", $.extend(true, {} , settings));
+                methods.createElements(settings.values['far_master_elements'], 'far_master_elements', 1);
+                methods.createElements(settings.values['far_elements'], 'far_elements', 2);
+                methods.createElements(settings.values['far_free_elements'], 'far_free_elements', 3);
+                $(this).data('settings', $.extend(true, {} , settings));
 
                 settings.ulWatcher = settings.$content_el.find('ul');
                 settings.masterWatcher = settings.ulWatcher.filter('.far_master_elements');
@@ -247,7 +224,7 @@
         },
         template_li: function (values) {
             return $(
-                '<li data-uid="' + values.id + '" data-relid="' + values.relId + '">' +
+                '<li data-uid="' + values.id + '" data-relid="' + values.relId + '" style="display: none;">' +
                 '<span class="display" contenteditable="false">' + values.desc + '</span>' +
                 settings.template.edit_element +
                 settings.template.close_element +
@@ -288,7 +265,7 @@
                 );
             } else if(elementType == 2) {
                 return $(
-                    '<li class="newElement">' +
+                    '<li class="newElement" style="display: none;">' +
                     settings.template.new_element +
                     '</li>'
                 );
@@ -334,7 +311,7 @@
             json_send['far_free_elements'] = methods.getElements(container_el, '.far_free_elements', '.newElementFree');
             json_send['far_elements'] = methods.getElements(container_el, '.far_elements', '.newElement');
             //console.log(json_send);
-            console.log(JSON.stringify(json_send));
+            //console.log(JSON.stringify(json_send));
             return json_send;
         },
         getElements: function (container_el, groupElements, classNewElements) {
@@ -386,5 +363,33 @@
             $.error('Method ' +  method + ' does not exist on jQuery.adminGroupLists');
         }
     };
+
+    $.fn.adminGroupLists.defaults = {
+        'version': '1.0',
+        'id_container': 'demo',
+        'template': { // HTML segments
+            'new_element': '<span class="display" contenteditable="true">Add new</span>',
+            'edit_element': '<span class="fa fa-pencil display-edit"></span>',
+            'close_element': '<span class="fa fa-times display-close close-element"></span>',
+            'assign_element': '<span class="fa fa-tag display-tag"></span>'
+        },
+        'values': {
+            "far_master_elements": [
+                {"id": "1", "desc": "Alimentacion"},
+                {"id": "4", "desc": "Servicios profesionales"},
+                {"id": "5", "desc": "Salud"}
+            ],
+            "far_free_elements": [
+                {"id": "7", "desc": "Farmacia"},
+                {"id": "8", "desc": "Optica"},
+                {"id": "9", "desc": "Parafarmacia"}
+            ],
+            "far_elements": [
+                {"id": "1", "desc": "Ferreteria", "relId": "1"},
+                {"id": "4", "desc": "Supermercado", "relId": "1"},
+                {"id": "5", "desc": "Bar / Restaurante", "relId": "4"}
+            ]
+        }
+    }
 
 })(window, jQuery);
