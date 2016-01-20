@@ -114,12 +114,15 @@
         assignElement: function () {
             var li = $(this).closest('li');
             var div = li.closest('div');
-            var element = li.detach();
             var idMaster = div.find('.far_master_elements').attr('data-id-selected');
 
-            element.find('.far_display-tag').remove();
-            element.attr('data-relid', idMaster);
-            div.find('.far_elements').find('.newElement').closest('li').before(element);
+            if(idMaster) {
+                var element = li.detach();
+
+                element.find('.far_display-tag').remove();
+                element.attr('data-relid', idMaster);
+                div.find('.far_elements').find('.newElement').closest('li').before(element);
+            }
         },
         newElementMaster: function () {
             var newElement = methods.template_li_new_item(1);

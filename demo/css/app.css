@@ -1,0 +1,25 @@
+.far-admin-groups ul li {
+    display: block;
+    width: auto;
+    padding: 2px 7px 2px 7px;
+    margin-bottom: 10px;
+    border-radius: 3px;
+    text-decoration: none;
+    background-color: #305e91;
+    color: white;
+}
+
+.far-admin-groups ul li span.fa {
+    width: 20px;
+    text-align: left;
+    color: #8ccffa;
+}
+
+.far-admin-groups ul li span.far_display-edit {
+    padding-left: 10px;
+    width: 30px;
+}
+
+.elementSelected {
+    background-color: lightblue;
+}
