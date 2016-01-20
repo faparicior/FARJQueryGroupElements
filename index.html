@@ -36,14 +36,25 @@
         <ul class="far_free_elements"></ul>
     </div>
 
+    <div>
+        <input type="button" onclick="getValues();"/>
+        <input type="button" onclick="getValues2();"/>
+    </div>
 
     <script type="text/javascript">
-    $(document).ready(function() {
-        $('.far-admin-groups').adminGroupLists('init');
-//        $('#demo').adminGroupLists('getAllElements');
-//        $('#demo2').adminGroupLists('init');
-//        $('#demo2').adminGroupLists('getAllElements');
-    });
+        function getValues(){
+            $('#demo').adminGroupLists('getAllElements');
+        }
+        function getValues2(){
+            $('#demo2').adminGroupLists('getAllElements');
+        }
+
+        $(document).ready(function() {
+            $('.far-admin-groups').adminGroupLists('init');
+    //        $('#demo').adminGroupLists('getAllElements');
+    //        $('#demo2').adminGroupLists('init');
+    //        $('#demo2').adminGroupLists('getAllElements');
+        });
 </script>
 </body>
 </html>

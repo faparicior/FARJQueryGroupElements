@@ -36,18 +36,17 @@
                     // non configurable settings
 //                }
                 settings.$content_el = $(this);
-                settings.id_content_el = $(this).attr('id');
+                settings.id_container = $(this).attr('id');
 
                 methods.createElements(settings.demo_values['far_master_elements'], 'far_master_elements', 1);
                 methods.createElements(settings.demo_values['far_elements'], 'far_elements', 2);
                 methods.createElements(settings.demo_values['far_free_elements'], 'far_free_elements', 3);
+                $(this).data("settings", $.extend(true, {} , settings));
 
                 settings.ulWatcher = settings.$content_el.find('ul');
                 settings.masterWatcher = settings.ulWatcher.filter('.far_master_elements');
                 settings.elementsWatcher = settings.ulWatcher.filter('.far_elements');
                 settings.freeElementsWatcher = settings.ulWatcher.filter('.far_free_elements');
-
-                $(this).data("settings", settings);
 
                 //
                 // Event methods
@@ -79,6 +78,8 @@
                 settings.elementsWatcher.on('click', '.close-element', methods.removeElement);
                 // Remove free categories
                 settings.freeElementsWatcher.on('click', '.close-element', methods.removeFreeElement);
+
+                console.log($(this).data("settings"));
             });
         },
         masterSelected: function () {
@@ -312,7 +313,7 @@
 
             if(!ulElement.length) {
                 ulElement = methods.template_ul(ulClass);
-                ulElement.appendTo('#' + settings.id_content_el);
+                ulElement.appendTo('#' + settings.id_container);
             }
 
             $.each(obj, function (i, val) {
@@ -327,13 +328,14 @@
             methods.template_li_new_item(listType).appendTo(ulElement);
         },
         getAllElements: function () {
+            var settings = $(this).data('settings');
             var container_el = $('#' + settings.id_container);
             var json_send = {};
 
             json_send['far_master_elements'] = methods.getElements(container_el, '.far_master_elements', '.newElementMaster');
             json_send['far_free_elements'] = methods.getElements(container_el, '.far_free_elements', '.newElementFree');
             json_send['far_elements'] = methods.getElements(container_el, '.far_elements', '.newElement');
-            //console.log(json_send);
+            console.log(json_send);
             //console.log(JSON.stringify(json_send));
             return json_send;
         },
