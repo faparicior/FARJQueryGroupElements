@@ -29,7 +29,7 @@
                 // Event methods
                 //
                 // Enter Key disable edit
-                settings.ulWatcher.on('keypress', '.display', function (e) {
+                settings.ulWatcher.on('keypress', '.far_display', function (e) {
                     return e.which != 13;
                 });
                 // Selected element
@@ -39,8 +39,8 @@
                 // Select child categories from master
                 settings.masterWatcher.on('click focus', 'li', methods.selectChildCategories);
                 // Edit element
-                settings.ulWatcher.on('click', '.display-edit', methods.editElement);
-                settings.ulWatcher.on('focusout', '.display', methods.uneditElement);
+                settings.ulWatcher.on('click', '.far_display-edit', methods.editElement);
+                settings.ulWatcher.on('focusout', '.far_display', methods.uneditElement);
                 // New element Master
                 settings.masterWatcher.on('click', '.newElementMaster', methods.newElementMaster);
                 // New element
@@ -48,7 +48,7 @@
                 // New free element
                 settings.freeElementsWatcher.on('click', '.newElementFree', methods.newFreeElement);
                 // Tagged free element
-                settings.freeElementsWatcher.on('click', '.display-tag', methods.assignElement);
+                settings.freeElementsWatcher.on('click', '.far_display-tag', methods.assignElement);
                 // Remove group categories
                 settings.masterWatcher.on('click', '.close-element', methods.removeMasterElement);
                 // Remove element
@@ -102,7 +102,7 @@
             li_child.filter('[data-relid = "' + id + '"]').show();
         },
         editElement: function () {
-            var element = $(this).closest('li').find('.display');
+            var element = $(this).closest('li').find('.far_display');
 
             element.attr('contenteditable', 'true');
             element.focusin();
@@ -117,7 +117,7 @@
             var element = li.detach();
             var idMaster = div.find('.far_master_elements').attr('data-id-selected');
 
-            element.find('.display-tag').remove();
+            element.find('.far_display-tag').remove();
             element.attr('data-relid', idMaster);
             div.find('.far_elements').find('.newElement').closest('li').before(element);
         },
@@ -129,7 +129,7 @@
 
             var li = $(this).closest('li');
             var ul = $(this).closest('ul');
-            var span = $(this).find('.display');
+            var span = $(this).find('.far_display');
 
             li.removeClass('newElementMaster');
             li.attr('data-uid',uid_data);
@@ -147,7 +147,7 @@
             var uid_data = methods.generateUUID();
 
             var li = $(this).closest('li');
-            var span = $(this).find('.display');
+            var span = $(this).find('.far_display');
 
             li.removeClass('newElement');
             $(this).attr('data-uid',uid_data);
@@ -168,7 +168,7 @@
             var newAssign = methods.template_assign_element();
 
             var li = $(this).closest('li');
-            var span = $(this).find('.display');
+            var span = $(this).find('.far_display');
 
             li.removeClass('newElementFree');
             $(this).attr('data-uid',uid_data);
@@ -185,8 +185,8 @@
             var element = li.detach();
             var newAssign = methods.template_assign_element();
 
-            element.find('.display').removeAttr('data-relid');
-            element.find('.display').before(newAssign);
+            element.find('.far_display').removeAttr('data-relid');
+            element.find('.far_display').before(newAssign);
             div.find('.far_free_elements').find('.newElementFree').closest('li').before(element);
         },
         removeFreeElement: function () {
@@ -216,7 +216,7 @@
         template_li_master: function (values) {
             return $(
                 '<li data-uid="' + values.id + '">' +
-                    '<span class="display" " contenteditable="false">' + values.desc + '</span>' +
+                    '<span class="far_display" " contenteditable="false">' + values.desc + '</span>' +
                     settings.template.edit_element +
                     settings.template.close_element +
                 '</li>'
@@ -225,7 +225,7 @@
         template_li: function (values) {
             return $(
                 '<li data-uid="' + values.id + '" data-relid="' + values.relId + '" style="display: none;">' +
-                '<span class="display" contenteditable="false">' + values.desc + '</span>' +
+                '<span class="far_display" contenteditable="false">' + values.desc + '</span>' +
                 settings.template.edit_element +
                 settings.template.close_element +
                 '</li>'
@@ -235,7 +235,7 @@
             return $(
                 '<li data-uid="' + values.id + '">' +
                     settings.template.assign_element +
-                    '<span class="display" contenteditable="false">' + values.desc + '</span>' +
+                    '<span class="far_display" contenteditable="false">' + values.desc + '</span>' +
                     settings.template.edit_element +
                     settings.template.close_element +
                 '</li>'
@@ -256,7 +256,7 @@
                 settings.template.assign_element
             );
         },
-        template_li_new_item: function (elementType) {
+        template_li_new_item: function (elementType, hidden) {
             if(elementType == 1) {
                 return $(
                     '<li class="newElementMaster">' +
@@ -264,11 +264,20 @@
                     '</li>'
                 );
             } else if(elementType == 2) {
-                return $(
-                    '<li class="newElement" style="display: none;">' +
-                    settings.template.new_element +
-                    '</li>'
-                );
+                if (hidden){
+                    return $(
+                        '<li class="newElement" style="display: none;">' +
+                        settings.template.new_element +
+                        '</li>'
+                    );
+
+                } else {
+                    return $(
+                        '<li class="newElement">' +
+                        settings.template.new_element +
+                        '</li>'
+                    );
+                }
             } else {
                 return $(
                     '<li class="newElementFree">' +
@@ -300,7 +309,11 @@
                     methods.template_li_free(val).appendTo(ulElement);
                 }
             });
-            methods.template_li_new_item(listType).appendTo(ulElement);
+            if(listType == 2) {
+                methods.template_li_new_item(listType, true).appendTo(ulElement);
+            } else {
+                methods.template_li_new_item(listType).appendTo(ulElement);
+            }
         },
         getAllElements: function () {
             var settings = $(this).data('settings');
@@ -321,7 +334,7 @@
             elements_each.each(function() {
                 var element = {};
                 element.id = $(this).attr('data-uid');
-                element.desc = $(this).find('.display').text();
+                element.desc = $(this).find('.far_display').text();
                 master.push(element);
             });
 
@@ -368,10 +381,10 @@
         'version': '1.0',
         'id_container': 'demo',
         'template': { // HTML segments
-            'new_element': '<span class="display" contenteditable="true">Add new</span>',
-            'edit_element': '<span class="fa fa-pencil display-edit"></span>',
-            'close_element': '<span class="fa fa-times display-close close-element"></span>',
-            'assign_element': '<span class="fa fa-tag display-tag"></span>'
+            'new_element': '<span class="far_display" contenteditable="true">Add new</span>',
+            'edit_element': '<span class="fa fa-pencil far_display-edit"></span>',
+            'close_element': '<span class="fa fa-times far_display-close close-element"></span>',
+            'assign_element': '<span class="fa fa-tag far_display-tag"></span>'
         },
         'values': {
             "far_master_elements": [
