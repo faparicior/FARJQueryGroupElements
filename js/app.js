@@ -78,8 +78,6 @@
                 settings.elementsWatcher.on('click', '.close-element', methods.removeElement);
                 // Remove free categories
                 settings.freeElementsWatcher.on('click', '.close-element', methods.removeFreeElement);
-
-                console.log($(this).data("settings"));
             });
         },
         masterSelected: function () {
@@ -335,8 +333,8 @@
             json_send['far_master_elements'] = methods.getElements(container_el, '.far_master_elements', '.newElementMaster');
             json_send['far_free_elements'] = methods.getElements(container_el, '.far_free_elements', '.newElementFree');
             json_send['far_elements'] = methods.getElements(container_el, '.far_elements', '.newElement');
-            console.log(json_send);
-            //console.log(JSON.stringify(json_send));
+            //console.log(json_send);
+            console.log(JSON.stringify(json_send));
             return json_send;
         },
         getElements: function (container_el, groupElements, classNewElements) {
