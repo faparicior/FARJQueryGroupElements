@@ -1,0 +1,56 @@
+.far-admin-groups {
+    height: 250px;
+}
+
+.far-admin-groups ul li {
+    display: block;
+    width: auto;
+    padding: 2px 7px 2px 7px;
+    margin-bottom: 3px;
+    border-radius: 3px;
+    text-decoration: none;
+    background-color: #305e91;
+    color: white;
+    float:left;
+    clear:left;
+}
+
+.box {
+    display: block;
+    float: left;
+    border: 1px solid gray;
+    min-height: 170px;
+}
+
+.far-admin-groups ul li span.fa{
+    width: 20px;
+    text-align: left;
+    color: #8ccffa;
+}
+
+.far-admin-groups ul li span.fa:hover{
+    color: whitesmoke;
+}
+
+.far-admin-groups ul li span:hover{
+    cursor: pointer;
+    cursor: hand;
+}
+
+.far-admin-groups ul li span.far_display-edit {
+    padding-left: 10px;
+    width: 30px;
+}
+
+.far-admin-groups ul li.elementSelected {
+    background-color: #18ace6;
+}
+
+.far-admin-groups ul {
+    float: left;
+}
+
+.box {
+    text-align: center;
+    width: 300px;
+}

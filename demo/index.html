@@ -14,20 +14,38 @@
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 
+    <link rel="stylesheet" href="css/far-group-elements.css">
+    <link rel="stylesheet" href="css/hover.css">
     <link rel="stylesheet" href="css/normalize.css">
-    <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
     <div id="demo" class="far-admin-groups">
-        <ul class="far_master_elements"></ul>
-        <ul class="far_elements"></ul>
-        <ul class="far_free_elements"></ul>
+        <div class="box">
+            <h4 class="list-heading">Master elements</h4>
+            <ul class="far_master_elements"></ul>
+        </div>
+        <div class="box">
+            <h4 class="list-heading">Selected elements</h4>
+            <ul class="far_elements"></ul>
+        </div>
+        <div class="box">
+            <h4 class="list-heading">Free elements</h4>
+            <ul class="far_free_elements"></ul>
+        </div>
     </div>
-
     <div id="demo2" class="far-admin-groups">
-        <ul class="far_master_elements"></ul>
-        <ul class="far_elements"></ul>
-        <ul class="far_free_elements"></ul>
+        <div class="box">
+            <h4 class="list-heading">Master elements 2</h4>
+            <ul class="far_master_elements"></ul>
+        </div>
+        <div class="box">
+            <h4 class="list-heading">Selected elements 2</h4>
+            <ul class="far_elements"></ul>
+        </div>
+        <div class="box">
+            <h4 class="list-heading">Free elements 2</h4>
+            <ul class="far_free_elements"></ul>
+        </div>
     </div>
 
     <div>
@@ -48,6 +66,13 @@
         }
 
         $(document).ready(function() {
+            $.fn.adminGroupLists.defaults.classes= {
+                'li_master': 'hvr-fade',
+                'li_element': 'hvr-fade',
+                'li_free_element': 'hvr-fade',
+                'li_new_element': 'hvr-fade'
+            };
+
             $.fn.adminGroupLists.defaults.values =  {
                 "far_master_elements": [
                     {"id": "1", "desc": "Alimentacion"},
@@ -66,6 +91,7 @@
                 ]
             };
             $('#demo').adminGroupLists('init');
+
             $.fn.adminGroupLists.defaults.values =  {
                 "far_master_elements": [
                     {"id": "1", "desc": "Alimentacion2"},

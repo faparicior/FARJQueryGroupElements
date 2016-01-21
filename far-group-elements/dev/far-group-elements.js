@@ -7,18 +7,19 @@
         init : function (opts) {
             return this.each(function () {
 
-//                if ($.isEmptyObject(settings)) {
+                //if ($.isEmptyObject(settings)) {
                     settings = $.extend(true, $.fn.adminGroupLists.defaults, opts);
                     // non configurable settings
                     console.log(settings);
-//                }
+                //}
                 settings.$content_el = $(this);
                 settings.id_container = $(this).attr('id');
+
+                $(this).data('settings', $.extend(true, {} , settings));
 
                 methods.createElements(settings.values['far_master_elements'], 'far_master_elements', 1);
                 methods.createElements(settings.values['far_elements'], 'far_elements', 2);
                 methods.createElements(settings.values['far_free_elements'], 'far_free_elements', 3);
-                $(this).data('settings', $.extend(true, {} , settings));
 
                 settings.ulWatcher = settings.$content_el.find('ul');
                 settings.masterWatcher = settings.ulWatcher.filter('.far_master_elements');
@@ -30,6 +31,9 @@
                 //
                 // Enter Key disable edit
                 settings.ulWatcher.on('keypress', '.far_display', function (e) {
+                    if (e.keyCode == 13) {
+                        $(e.target).removeAttr('contenteditable');
+                    }
                     return e.which != 13;
                 });
                 // Selected element
@@ -59,13 +63,15 @@
         },
         masterSelected: function () {
             var li = $(this);
-            var div = li.closest('div');
+            var div = li.closest('.far-admin-groups');
             var ul = li.closest('ul');
             var id = li.data('uid');
             var li_child_newelement = div.find('.far_elements').find('li').filter('.newElement');
+            var li_child = div.find('.far_elements').find('li');
 
             ul.attr('data-id-selected', id);
             ul.find('.elementSelected').removeClass('elementSelected');
+            li_child.filter('.elementSelected').removeClass('elementSelected');
             li.addClass('elementSelected');
 
             // Controls event that shows 'Add new' in element
@@ -92,7 +98,7 @@
         },
         selectChildCategories: function() {
             var li = $(this);
-            var div = li.closest('div');
+            var div = li.closest('.far-admin-groups');
             var ul_master = li.closest('ul');
             var li_child = div.find('.far_elements').find('li');
             var id = li.data('uid');
@@ -113,7 +119,7 @@
         },
         assignElement: function () {
             var li = $(this).closest('li');
-            var div = li.closest('div');
+            var div = li.closest('.far-admin-groups');
             var idMaster = div.find('.far_master_elements').attr('data-id-selected');
 
             if(idMaster) {
@@ -150,12 +156,14 @@
             var uid_data = methods.generateUUID();
 
             var li = $(this).closest('li');
+            var div = li.closest('.far-admin-groups');
+            var ul_master = div.find('ul').filter('.far_master_elements');
             var span = $(this).find('.far_display');
 
             li.removeClass('newElement');
             $(this).attr('data-uid',uid_data);
 
-            var idMaster = settings.masterWatcher.attr('data-id-selected');
+            var idMaster = ul_master.attr('data-id-selected');
             li.attr('data-relid', idMaster);
 
             span.after(newClose);
@@ -184,7 +192,7 @@
         },
         removeElement: function () {
             var li = $(this).closest('li');
-            var div = li.closest('div');
+            var div = li.closest('.far-admin-groups');
             var element = li.detach();
             var newAssign = methods.template_assign_element();
 
@@ -198,7 +206,7 @@
         removeMasterElement: function () {
             var li_master = $(this).closest('li');
             var id = li_master.attr('data-uid');
-            var div = li_master.closest('div');
+            var div = li_master.closest('.far-admin-groups');
             var ul = li_master.closest('ul');
 
 
@@ -223,7 +231,7 @@
                     settings.template.edit_element +
                     settings.template.close_element +
                 '</li>'
-            );
+            ).addClass(settings.classes.li_master);
         },
         template_li: function (values) {
             return $(
@@ -232,7 +240,7 @@
                 settings.template.edit_element +
                 settings.template.close_element +
                 '</li>'
-            );
+            ).addClass(settings.classes.li_element);
         },
         template_li_free: function (values) {
             return $(
@@ -242,7 +250,7 @@
                     settings.template.edit_element +
                     settings.template.close_element +
                 '</li>'
-            );
+            ).addClass(settings.classes.li_free_element);
         },
         template_edit_element: function () {
             return $(
@@ -265,28 +273,28 @@
                     '<li class="newElementMaster">' +
                     settings.template.new_element +
                     '</li>'
-                );
+                ).addClass(settings.classes.li_new_element);
             } else if(elementType == 2) {
                 if (hidden){
                     return $(
                         '<li class="newElement" style="display: none;">' +
                         settings.template.new_element +
                         '</li>'
-                    );
+                    ).addClass(settings.classes.li_new_element);;
 
                 } else {
                     return $(
                         '<li class="newElement">' +
                         settings.template.new_element +
                         '</li>'
-                    );
+                    ).addClass(settings.classes.li_new_element);;
                 }
             } else {
                 return $(
                     '<li class="newElementFree">' +
                     settings.template.new_element +
                     '</li>'
-                );
+                ).addClass(settings.classes.li_new_element);;
             }
         },
         template_ul: function (idUl) {
@@ -388,6 +396,12 @@
             'edit_element': '<span class="fa fa-pencil far_display-edit"></span>',
             'close_element': '<span class="fa fa-times far_display-close close-element"></span>',
             'assign_element': '<span class="fa fa-tag far_display-tag"></span>'
+        },
+        'classes': { // LI custom classes
+            'li_master': '',
+            'li_element': '',
+            'li_free_element': '',
+            'li_new_element': ''
         },
         'values': {
             "far_master_elements": [
