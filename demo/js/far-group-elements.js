@@ -27,6 +27,7 @@
                 //
                 // Enter Key disable edit
                 ulWatcher.on('keypress', '.far_display', methods.interceptKeys);
+                ulWatcher.on('keyup', '.far_display', methods.interceptEscKeys);
                 // Selected element
                 masterWatcher.on('click', 'li' , methods.masterSelected);
                 elementsWatcher.on('click', 'li' , methods.elementsSelected);
@@ -382,11 +383,27 @@
                 selection.addRange(range);
             }
         },
+        deselectText: function (){
+            if ( document.selection ) {
+                document.selection.empty();
+            } else if ( window.getSelection ) {
+                window.getSelection().removeAllRanges();
+            }
+        },
         interceptKeys: function (e) {
+            // Intercepts 'Enter' behaviour
             if (e.keyCode == 13) {
                 $(e.target).removeAttr('contenteditable');
             }
             return e.which != 13;
+        },
+        interceptEscKeys: function (e) {
+            // Replaces 'Esc' behaviour with 'Ctrl+Z'
+            if(e.keyCode == 27) {
+                document.execCommand('Undo',false,0);
+                methods.deselectText();
+                $(e.target).removeAttr('contenteditable');
+            }
         }
     };
 
