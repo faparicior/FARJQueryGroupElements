@@ -75,38 +75,45 @@
 
             $.fn.adminGroupLists.defaults.values =  {
                 "far_master_elements": [
-                    {"id": "1", "desc": "Alimentacion"},
-                    {"id": "4", "desc": "Servicios profesionales"},
-                    {"id": "5", "desc": "Salud"}
+                    {"id": "1", "desc": "Markets"},
+                    {"id": "4", "desc": "Professional services"},
+                    {"id": "5", "desc": "Health"}
                 ],
                 "far_free_elements": [
-                    {"id": "7", "desc": "Farmacia"},
-                    {"id": "8", "desc": "Optica"},
-                    {"id": "9", "desc": "Parafarmacia"}
+                    {"id": "7", "desc": "Pharmacy"},
+                    {"id": "8", "desc": "Optics"},
+                    {"id": "9", "desc": "Shoes"}
                 ],
                 "far_elements": [
-                    {"id": "1", "desc": "Ferreteria", "relId": "1"},
-                    {"id": "4", "desc": "Supermercado", "relId": "1"},
-                    {"id": "5", "desc": "Bar / Restaurante", "relId": "4"}
+                    {"id": "1", "desc": "Supermarket", "relId": "1"},
+                    {"id": "4", "desc": "Fruit Store", "relId": "1"},
+                    {"id": "5", "desc": "Hardware", "relId": "4"}
                 ]
             };
             $('#demo').adminGroupLists('init');
 
+            $.fn.adminGroupLists.defaults.classes= {
+                'li_master': '',
+                'li_element': '',
+                'li_free_element': '',
+                'li_new_element': ''
+            };
+
             $.fn.adminGroupLists.defaults.values =  {
                 "far_master_elements": [
-                    {"id": "1", "desc": "Alimentacion2"},
-                    {"id": "4", "desc": "Servicios profesionales2"},
-                    {"id": "5", "desc": "Salud2"}
+                    {"id": "1", "desc": "Markets 2"},
+                    {"id": "4", "desc": "Professional services 2"},
+                    {"id": "5", "desc": "Health 2"}
                 ],
                 "far_free_elements": [
-                    {"id": "7", "desc": "Farmacia2"},
-                    {"id": "8", "desc": "Optica2"},
-                    {"id": "9", "desc": "Parafarmacia2"}
+                    {"id": "7", "desc": "Pharmacy 2"},
+                    {"id": "8", "desc": "Optics 2"},
+                    {"id": "9", "desc": "Shoes 2"}
                 ],
                 "far_elements": [
-                    {"id": "1", "desc": "Ferreteria2", "relId": "1"},
-                    {"id": "4", "desc": "Supermercado2", "relId": "1"},
-                    {"id": "5", "desc": "Bar / Restaurante2", "relId": "4"}
+                    {"id": "1", "desc": "Supermarket 2", "relId": "1"},
+                    {"id": "4", "desc": "Fruit Store 2", "relId": "1"},
+                    {"id": "5", "desc": "Hardware 2", "relId": "4"}
                 ]
             };
             $('#demo2').adminGroupLists('init');

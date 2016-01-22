@@ -1,64 +1,55 @@
 ;(function(window, jQuery, undefined) {
     'use strict';
 
-    var settings = {},
-
-    methods = {
+    var methods = {
         init : function (opts) {
             return this.each(function () {
 
                 //if ($.isEmptyObject(settings)) {
-                    settings = $.extend(true, $.fn.adminGroupLists.defaults, opts);
-                    // non configurable settings
-                    console.log(settings);
+                var settings = $.extend(true, $.fn.adminGroupLists.defaults, opts);
                 //}
                 settings.$content_el = $(this);
                 settings.id_container = $(this).attr('id');
 
                 $(this).data('settings', $.extend(true, {} , settings));
 
-                methods.createElements(settings.values['far_master_elements'], 'far_master_elements', 1);
-                methods.createElements(settings.values['far_elements'], 'far_elements', 2);
-                methods.createElements(settings.values['far_free_elements'], 'far_free_elements', 3);
+                methods.createElements(settings, 'far_master_elements', 1);
+                methods.createElements(settings, 'far_elements', 2);
+                methods.createElements(settings, 'far_free_elements', 3);
 
-                settings.ulWatcher = settings.$content_el.find('ul');
-                settings.masterWatcher = settings.ulWatcher.filter('.far_master_elements');
-                settings.elementsWatcher = settings.ulWatcher.filter('.far_elements');
-                settings.freeElementsWatcher = settings.ulWatcher.filter('.far_free_elements');
+                var ulWatcher = settings.$content_el.find('ul');
+                var masterWatcher = ulWatcher.filter('.far_master_elements');
+                var elementsWatcher = ulWatcher.filter('.far_elements');
+                var freeElementsWatcher = ulWatcher.filter('.far_free_elements');
 
                 //
                 // Event methods
                 //
                 // Enter Key disable edit
-                settings.ulWatcher.on('keypress', '.far_display', function (e) {
-                    if (e.keyCode == 13) {
-                        $(e.target).removeAttr('contenteditable');
-                    }
-                    return e.which != 13;
-                });
+                ulWatcher.on('keypress', '.far_display', methods.interceptKeys);
                 // Selected element
-                settings.masterWatcher.on('click', 'li' , methods.masterSelected);
-                settings.elementsWatcher.on('click', 'li' , methods.elementsSelected);
-                settings.freeElementsWatcher.on('click', 'li' , methods.freeElementsSelected);
+                masterWatcher.on('click', 'li' , methods.masterSelected);
+                elementsWatcher.on('click', 'li' , methods.elementsSelected);
+                freeElementsWatcher.on('click', 'li' , methods.freeElementsSelected);
                 // Select child categories from master
-                settings.masterWatcher.on('click focus', 'li', methods.selectChildCategories);
+                masterWatcher.on('click focus', 'li', methods.selectChildCategories);
                 // Edit element
-                settings.ulWatcher.on('click', '.far_display-edit', methods.editElement);
-                settings.ulWatcher.on('focusout', '.far_display', methods.uneditElement);
+                ulWatcher.on('click', '.far_display-edit', methods.editElement);
+                ulWatcher.on('focusout', '.far_display', methods.uneditElement);
                 // New element Master
-                settings.masterWatcher.on('click', '.newElementMaster', methods.newElementMaster);
+                masterWatcher.on('click', '.newElementMaster', methods.newElementMaster);
                 // New element
-                settings.elementsWatcher.on('click', '.newElement', methods.newElement);
+                elementsWatcher.on('click', '.newElement', methods.newElement);
                 // New free element
-                settings.freeElementsWatcher.on('click', '.newElementFree', methods.newFreeElement);
+                freeElementsWatcher.on('click', '.newElementFree', methods.newFreeElement);
                 // Tagged free element
-                settings.freeElementsWatcher.on('click', '.far_display-tag', methods.assignElement);
+                freeElementsWatcher.on('click', '.far_display-tag', methods.assignElement);
                 // Remove group categories
-                settings.masterWatcher.on('click', '.close-element', methods.removeMasterElement);
+                masterWatcher.on('click', '.close-element', methods.removeMasterElement);
                 // Remove element
-                settings.elementsWatcher.on('click', '.close-element', methods.removeElement);
+                elementsWatcher.on('click', '.close-element', methods.removeElement);
                 // Remove free categories
-                settings.freeElementsWatcher.on('click', '.close-element', methods.removeFreeElement);
+                freeElementsWatcher.on('click', '.close-element', methods.removeFreeElement);
             });
         },
         masterSelected: function () {
@@ -130,10 +121,13 @@
                 div.find('.far_elements').find('.newElement').closest('li').before(element);
             }
         },
-        newElementMaster: function () {
-            var newElement = methods.template_li_new_item(1);
-            var newEdit = methods.template_edit_element();
-            var newClose = methods.template_close_element();
+        newElementMaster: function (element) {
+            var classes_extra = methods.getClassesExtra(element.target);
+            var templates = methods.getTemplates(element.target);
+
+            var newElement = methods.template_li_new_item(1, templates, classes_extra, false);
+            var newEdit = $(templates.edit_element);
+            var newClose = $(templates.close_element);
             var uid_data = methods.generateUUID();
 
             var li = $(this).closest('li');
@@ -149,10 +143,13 @@
             methods.selectText(span);
             li.after(newElement);
         },
-        newElement: function () {
-            var newElement = methods.template_li_new_item(2);
-            var newEdit = methods.template_edit_element();
-            var newClose = methods.template_close_element();
+        newElement: function (element) {
+            var classes_extra = methods.getClassesExtra(element.target);
+            var templates = methods.getTemplates(element.target);
+
+            var newElement = methods.template_li_new_item(2, templates, classes_extra, false);
+            var newEdit = $(templates.edit_element);
+            var newClose = $(templates.close_element);
             var uid_data = methods.generateUUID();
 
             var li = $(this).closest('li');
@@ -171,12 +168,15 @@
             methods.selectText(span);
             span.closest('li').after(newElement);
         },
-        newFreeElement: function () {
-            var newElement = methods.template_li_new_item(3);
-            var newEdit = methods.template_edit_element();
-            var newClose = methods.template_close_element();
+        newFreeElement: function (element) {
+            var classes_extra = methods.getClassesExtra(element.target);
+            var templates = methods.getTemplates(element.target);
+
+            var newElement = methods.template_li_new_item(3, templates, classes_extra, false);
+            var newEdit = $(templates.edit_element);
+            var newClose = $(templates.close_element);
+            var newAssign = $(templates.assign_element);
             var uid_data = methods.generateUUID();
-            var newAssign = methods.template_assign_element();
 
             var li = $(this).closest('li');
             var span = $(this).find('.far_display');
@@ -190,24 +190,37 @@
             methods.selectText(span);
             li.after(newElement);
         },
-        removeElement: function () {
+        getClassesExtra: function (element) {
+            var setting = $(element).closest('.far-admin-groups').data('settings');
+            return setting.classes;
+        },
+        getTemplates: function (element) {
+            var setting = $(element).closest('.far-admin-groups').data('settings');
+            return setting.template;
+        },
+        removeElement: function (element) {
+            var templates = methods.getTemplates(element.target);
+
             var li = $(this).closest('li');
             var div = li.closest('.far-admin-groups');
-            var element = li.detach();
-            var newAssign = methods.template_assign_element();
+            var li_element = li.detach();
+            var newAssign = $(templates.assign_element);
 
-            element.find('.far_display').removeAttr('data-relid');
-            element.find('.far_display').before(newAssign);
-            div.find('.far_free_elements').find('.newElementFree').closest('li').before(element);
+            li_element.find('.far_display').removeAttr('data-relid');
+            li_element.find('.far_display').before(newAssign);
+            div.find('.far_free_elements').find('.newElementFree').closest('li').before(li_element);
         },
         removeFreeElement: function () {
             $(this).closest('li').remove();
         },
-        removeMasterElement: function () {
+        removeMasterElement: function (element) {
+            var templates = methods.getTemplates(element.target);
+
             var li_master = $(this).closest('li');
             var id = li_master.attr('data-uid');
             var div = li_master.closest('.far-admin-groups');
             var ul = li_master.closest('ul');
+            var id_master_selected = ul.attr('data-id-selected');
 
 
             var li_child = div.find('.far_elements').find('li');
@@ -215,86 +228,75 @@
             var li_child_newelement = li_child.filter('.newElement');
             var ul_free_elements = div.find('.far_free_elements');
 
-            li_child_elements.prepend(methods.template_assign_element());
+            li_child_elements.prepend($(templates.assign_element));
             li_child_elements.detach();
-            li_child_newelement.hide();
+
+            if(id == id_master_selected){
+                ul.removeAttr('data-id-selected');
+                li_child_newelement.hide();
+            }
 
             ul_free_elements.find('li').filter('.newElementFree').before(li_child_elements);
             // Controls event that shows 'Add new' in element
             //li_child_newelement.attr('data-eventhide', 'true');
             li_master.remove();
         },
-        template_li_master: function (values) {
+        template_li_master: function (values, templates, classes) {
             return $(
                 '<li data-uid="' + values.id + '">' +
                     '<span class="far_display" " contenteditable="false">' + values.desc + '</span>' +
-                    settings.template.edit_element +
-                    settings.template.close_element +
+                    templates.edit_element +
+                    templates.close_element +
                 '</li>'
-            ).addClass(settings.classes.li_master);
+            ).addClass(classes.li_master);
         },
-        template_li: function (values) {
+        template_li: function (values, templates, classes) {
             return $(
                 '<li data-uid="' + values.id + '" data-relid="' + values.relId + '" style="display: none;">' +
                 '<span class="far_display" contenteditable="false">' + values.desc + '</span>' +
-                settings.template.edit_element +
-                settings.template.close_element +
+                templates.edit_element +
+                templates.close_element +
                 '</li>'
-            ).addClass(settings.classes.li_element);
+            ).addClass(classes.li_element);
         },
-        template_li_free: function (values) {
+        template_li_free: function (values, templates, classes) {
             return $(
                 '<li data-uid="' + values.id + '">' +
-                    settings.template.assign_element +
+                    templates.assign_element +
                     '<span class="far_display" contenteditable="false">' + values.desc + '</span>' +
-                    settings.template.edit_element +
-                    settings.template.close_element +
+                    templates.edit_element +
+                    templates.close_element +
                 '</li>'
-            ).addClass(settings.classes.li_free_element);
+            ).addClass(classes.li_free_element);
         },
-        template_edit_element: function () {
-            return $(
-                settings.template.edit_element
-            );
-        },
-        template_close_element: function () {
-            return $(
-              settings.template.close_element
-            );
-        },
-        template_assign_element: function () {
-            return $(
-                settings.template.assign_element
-            );
-        },
-        template_li_new_item: function (elementType, hidden) {
+        template_li_new_item: function (elementType, template, classes, hidden) {
             if(elementType == 1) {
                 return $(
                     '<li class="newElementMaster">' +
-                    settings.template.new_element +
+                        template.new_element +
                     '</li>'
-                ).addClass(settings.classes.li_new_element);
+                ).addClass(classes.li_master);
             } else if(elementType == 2) {
                 if (hidden){
                     return $(
                         '<li class="newElement" style="display: none;">' +
-                        settings.template.new_element +
+                            template.new_element +
                         '</li>'
-                    ).addClass(settings.classes.li_new_element);;
+                    ).addClass(classes.li_new_element);
 
                 } else {
                     return $(
                         '<li class="newElement">' +
-                        settings.template.new_element +
+                            template.new_element +
                         '</li>'
-                    ).addClass(settings.classes.li_new_element);;
+                    ).addClass(classes.li_new_element);
                 }
             } else {
                 return $(
                     '<li class="newElementFree">' +
-                    settings.template.new_element +
+                        template.new_element +
                     '</li>'
-                ).addClass(settings.classes.li_new_element);;
+                ).addClass(classes.li_free_element);
             }
         },
         template_ul: function (idUl) {
@@ -303,7 +305,11 @@
                 '</<ul>'
             );
         },
-        createElements: function (obj,ulClass, listType) {
+        createElements: function (settings, ulClass, listType) {
+            var classes_extra = settings.classes;
+            var templates = settings.template;
+            var obj = settings.values[ulClass];
+
             var ulElement = settings.$content_el.find('.' + ulClass);
 
             if(!ulElement.length) {
@@ -313,17 +319,17 @@
 
             $.each(obj, function (i, val) {
                 if(listType == 1) {
-                    methods.template_li_master(val).appendTo(ulElement);
+                    methods.template_li_master(val, templates, classes_extra).appendTo(ulElement);
                 } else if(listType == 2) {
-                    methods.template_li(val).appendTo(ulElement);
+                    methods.template_li(val, templates, classes_extra).appendTo(ulElement);
                 } else {
-                    methods.template_li_free(val).appendTo(ulElement);
+                    methods.template_li_free(val, templates, classes_extra).appendTo(ulElement);
                 }
             });
             if(listType == 2) {
-                methods.template_li_new_item(listType, true).appendTo(ulElement);
+                methods.template_li_new_item(listType, templates, classes_extra, true).appendTo(ulElement);
             } else {
-                methods.template_li_new_item(listType).appendTo(ulElement);
+                methods.template_li_new_item(listType, templates, classes_extra, false).appendTo(ulElement);
             }
         },
         getAllElements: function () {
@@ -375,6 +381,12 @@
                 selection.removeAllRanges();
                 selection.addRange(range);
             }
+        },
+        interceptKeys: function (e) {
+            if (e.keyCode == 13) {
+                $(e.target).removeAttr('contenteditable');
+            }
+            return e.which != 13;
         }
     };
 
@@ -405,19 +417,19 @@
         },
         'values': {
             "far_master_elements": [
-                {"id": "1", "desc": "Alimentacion"},
-                {"id": "4", "desc": "Servicios profesionales"},
-                {"id": "5", "desc": "Salud"}
+                {"id": "1", "desc": "Markets"},
+                {"id": "4", "desc": "Professional services"},
+                {"id": "5", "desc": "Health"}
             ],
             "far_free_elements": [
-                {"id": "7", "desc": "Farmacia"},
-                {"id": "8", "desc": "Optica"},
-                {"id": "9", "desc": "Parafarmacia"}
+                {"id": "7", "desc": "Pharmacy"},
+                {"id": "8", "desc": "Optics"},
+                {"id": "9", "desc": "Shoes"}
             ],
             "far_elements": [
-                {"id": "1", "desc": "Ferreteria", "relId": "1"},
-                {"id": "4", "desc": "Supermercado", "relId": "1"},
-                {"id": "5", "desc": "Bar / Restaurante", "relId": "4"}
+                {"id": "1", "desc": "Supermarket", "relId": "1"},
+                {"id": "4", "desc": "Fruit Store", "relId": "1"},
+                {"id": "5", "desc": "Hardware", "relId": "4"}
             ]
         }
     }
