@@ -1,3 +1,11 @@
+/*
+ * jQuery Group Elements Admin plugin
+ * http://www.fernandoaparicio.net
+ * Copyright 2016, faparicior
+ * Free to use under the MIT license.
+ * http://www.opensource.org/licenses/mit-license.php
+ */
+
 ;(function(window, jQuery, undefined) {
     'use strict';
 
@@ -274,30 +282,29 @@
             if(elementType == 1) {
                 return $(
                     '<li class="newElementMaster">' +
-                        template.new_element +
+                        methods.getNewElementText(elementType, template)+
                     '</li>'
-                ).addClass(classes.li_master);
+                ).addClass(classes.li_master)
             } else if(elementType == 2) {
                 if (hidden){
                     return $(
                         '<li class="newElement" style="display: none;">' +
-                            template.new_element +
+                            methods.getNewElementText(elementType, template)+
                         '</li>'
-                    ).addClass(classes.li_new_element);
-
+                    ).addClass(classes.li_new_element)
                 } else {
                     return $(
                         '<li class="newElement">' +
-                            template.new_element +
+                            methods.getNewElementText(elementType, template)+
                         '</li>'
-                    ).addClass(classes.li_new_element);
+                    ).addClass(classes.li_new_element)
                 }
             } else {
                 return $(
                     '<li class="newElementFree">' +
-                        template.new_element +
+                        methods.getNewElementText(elementType, template)+
                     '</li>'
-                ).addClass(classes.li_free_element);
+                ).addClass(classes.li_free_element)
             }
         },
         template_ul: function (idUl) {
@@ -305,6 +312,22 @@
                 '<ul class="' + idUl + '">' +
                 '</<ul>'
             );
+        },
+        getNewElementText: function (elementType, template){
+            var element = $(template.new_element);
+
+            switch (elementType) {
+                case 1:
+                    element.text(template.li_master_text);
+                    break;
+                case 2:
+                    element.text(template.li_element_text);
+                    break;
+                case 3:
+                    element.text(template.li_free_element_text);
+                    break;
+            }
+            return element.wrap('<p/>').parent().html();
         },
         createElements: function (settings, ulClass, listType) {
             var classes_extra = settings.classes;
@@ -421,10 +444,13 @@
         'version': '1.0',
         'id_container': 'demo',
         'template': { // HTML segments
-            'new_element': '<span class="far_display" contenteditable="true">Add new</span>',
+            'new_element': '<span class="far_display" contenteditable="true"></span>',
             'edit_element': '<span class="fa fa-pencil far_display-edit"></span>',
             'close_element': '<span class="fa fa-times far_display-close close-element"></span>',
-            'assign_element': '<span class="fa fa-tag far_display-tag"></span>'
+            'assign_element': '<span class="fa fa-tag far_display-tag"></span>',
+            'li_master_text': 'New element',
+            'li_element_text': 'New element',
+            'li_free_element_text': 'New FREE element'
         },
         'classes': { // LI custom classes
             'li_master': '',

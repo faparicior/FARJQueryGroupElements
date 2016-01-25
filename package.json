@@ -1,6 +1,6 @@
 {
   "name": "far-jquery-group-elements",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "JQuery plugin that organize list of elements with dependencies. Works with a JSON. See the demo folder for test.",
   "main": "far-group-elements/minfied/far-group-elements.js",
   "scripts": {
@@ -16,7 +16,8 @@
     "jquery",
     "lists",
     "hierarchy",
-    "listgroup"
+    "listgroup",
+    "admin-list"
   ],
   "author": "Fernando Aparicio",
   "license": "MIT",
