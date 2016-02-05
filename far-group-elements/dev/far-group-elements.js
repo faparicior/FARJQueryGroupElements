@@ -21,6 +21,10 @@
 
                 $(this).data('settings', $.extend(true, {} , settings));
 
+                methods.clearElements(settings, 'far_master_elements');
+                methods.clearElements(settings, 'far_elements');
+                methods.clearElements(settings, 'far_free_elements');
+
                 methods.createElements(settings, 'far_master_elements', 1);
                 methods.createElements(settings, 'far_elements', 2);
                 methods.createElements(settings, 'far_free_elements', 3);
@@ -29,6 +33,11 @@
                 var masterWatcher = ulWatcher.filter('.far_master_elements');
                 var elementsWatcher = ulWatcher.filter('.far_elements');
                 var freeElementsWatcher = ulWatcher.filter('.far_free_elements');
+
+                // Disable event watcher to reengage.
+                masterWatcher.off('click', '.newElementMaster');
+                elementsWatcher.off('click', '.newElement');
+                freeElementsWatcher.off('click', '.newElementFree');
 
                 //
                 // Event methods
@@ -238,6 +247,7 @@
             var ul_free_elements = div.find('.far_free_elements');
 
             li_child_elements.prepend($(templates.assign_element));
+            li_child_elements.show();
             li_child_elements.detach();
 
             if(id == id_master_selected){
@@ -356,6 +366,11 @@
                 methods.template_li_new_item(listType, templates, classes_extra, false).appendTo(ulElement);
             }
         },
+        clearElements: function (settings, ulClass) {
+            var liElements = settings.$content_el.find('.' + ulClass).find('li');
+
+            liElements.remove();
+        },
         getAllElements: function () {
             var settings = $(this).data('settings');
             var container_el = $('#' + settings.id_container);
@@ -364,8 +379,6 @@
             json_send['far_master_elements'] = methods.getElements(container_el, '.far_master_elements', '.newElementMaster');
             json_send['far_free_elements'] = methods.getElements(container_el, '.far_free_elements', '.newElementFree');
             json_send['far_elements'] = methods.getElements(container_el, '.far_elements', '.newElement');
-            //console.log(json_send);
-            //console.log(JSON.stringify(json_send));
             return json_send;
         },
         getElements: function (container_el, groupElements, classNewElements) {
