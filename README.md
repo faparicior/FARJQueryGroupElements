@@ -13,8 +13,8 @@ You can test the functionality in the demo folder.
 Basically, you have to pass a JSON with the values, and use de 'id' 
 and the 'relId' to maintain the relationship.
 
-Data
-----
+Data sended
+-----------
 ```javascript
     $.fn.adminGroupLists.defaults.values =  {
         "far_master_elements": [
@@ -34,6 +34,30 @@ Data
         ]
     };
 ```
+
+Data returned
+-------------
+```javascript
+    $.fn.adminGroupLists.defaults.values =  {
+        "far_master_elements": [
+            {"id": "1", "desc": "Markets 2", "status": "normal"},
+            {"id": "4", "desc": "Non-Professional services 2", "status": "updated"},
+            {"id": "5", "desc": "Health 2", "status": "normal"}
+        ],
+        "far_free_elements": [
+            {"id": "7", "desc": "Pharmacy 2", "status": "normal"},
+            {"id": "8", "desc": "Optics 2", "status": "normal"},
+            {"id": "9", "desc": "Shoes 2", "status": "normal"}
+            {"id": "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx", "desc": "Beach", "status": "new"}
+        ],
+        "far_elements": [
+            {"id": "1", "desc": "Supermarket 2", "relId": "1", "status": "updated"},
+            {"id": "4", "desc": "Fruit Store 2", "relId": "1", "status": "normal"},
+            {"id": "5", "desc": "Hardware 2", "relId": "4", "status": "normal"}
+        ]
+    };
+```
+
 
 Classes and texts
 -----------------
