@@ -13,8 +13,8 @@ You can test the functionality in the demo folder.
 Basically, you have to pass a JSON with the values, and use de 'id' 
 and the 'relId' to maintain the relationship.
 
-Data sended
------------
+Data sent
+---------
 ```javascript
     $.fn.adminGroupLists.defaults.values =  {
         "far_master_elements": [
