@@ -96,7 +96,7 @@ uses to display the "New element" option.
 
 If you want to disable the "New element", you only have to pass the text without value. 
 
-```
+```javascript
     $.fn.adminGroupLists.defaults.text_new = {
         'li_master_text': '',
         'li_element_text': 'New element',
