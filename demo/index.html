@@ -71,7 +71,10 @@
                 'li_element': 'hvr-fade',
                 'li_free_element': 'hvr-fade',
                 'li_new_element': 'hvr-fade',
-                'li_master_text': 'New element',
+            };
+
+            $.fn.adminGroupLists.defaults.text_new = {
+                'li_master_text': 'j',
                 'li_element_text': 'New element',
                 'li_free_element_text': 'New FREE element'
             };
@@ -95,12 +98,15 @@
             };
             $('#demo').adminGroupLists('init');
 
-            $.fn.adminGroupLists.defaults.classes= {
+            $.fn.adminGroupLists.defaults.classes = {
                 'li_master': '',
                 'li_element': '',
                 'li_free_element': '',
-                'li_new_element': '',
-                'li_master_text': 'New element',
+                'li_new_element': ''
+            };
+
+            $.fn.adminGroupLists.defaults.text_new = {
+                'li_master_text': 'New category',
                 'li_element_text': 'New element',
                 'li_free_element_text': 'New FREE element'
             };

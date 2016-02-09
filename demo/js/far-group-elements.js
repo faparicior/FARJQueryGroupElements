@@ -34,7 +34,7 @@
                 var elementsWatcher = ulWatcher.filter('.far_elements');
                 var freeElementsWatcher = ulWatcher.filter('.far_free_elements');
 
-                // Status elements ('normal', 'new', 'modified')
+                // Status elements ('normal', 'new', 'updated')
                 ulWatcher.find('li').attr('data-status','normal');
 
                 // Disable event watcher to reengage.
@@ -124,7 +124,9 @@
             var element = li.find('.far_display');
 
             element.attr('contenteditable', 'true');
-            li.attr('data-status','modified');
+            if (li.attr('data-status') != 'new') {
+                li.attr('data-status','updated');
+            }
 
             element.focusin();
             methods.selectText(element);
@@ -146,10 +148,10 @@
             }
         },
         newElementMaster: function (element) {
-            var classes_extra = methods.getClassesExtra(element.target);
-            var templates = methods.getTemplates(element.target);
+            var settings = methods.getSettings(element.target);
+            var templates = settings.template;
 
-            var newElement = methods.template_li_new_item(1, templates, classes_extra, false);
+            var newElement = methods.template_li_new_item(1, settings, false);
             var newEdit = $(templates.edit_element);
             var newClose = $(templates.close_element);
             var uid_data = methods.generateUUID();
@@ -169,10 +171,10 @@
             li.after(newElement);
         },
         newElement: function (element) {
-            var classes_extra = methods.getClassesExtra(element.target);
-            var templates = methods.getTemplates(element.target);
+            var settings = methods.getSettings(element.target);
+            var templates = settings.template;
 
-            var newElement = methods.template_li_new_item(2, templates, classes_extra, false);
+            var newElement = methods.template_li_new_item(2, settings, false);
             var newEdit = $(templates.edit_element);
             var newClose = $(templates.close_element);
             var uid_data = methods.generateUUID();
@@ -195,10 +197,10 @@
             span.closest('li').after(newElement);
         },
         newFreeElement: function (element) {
-            var classes_extra = methods.getClassesExtra(element.target);
-            var templates = methods.getTemplates(element.target);
+            var settings = methods.getSettings(element.target);
+            var templates = settings.template;
 
-            var newElement = methods.template_li_new_item(3, templates, classes_extra, false);
+            var newElement = methods.template_li_new_item(3, settings, false);
             var newEdit = $(templates.edit_element);
             var newClose = $(templates.close_element);
             var newAssign = $(templates.assign_element);
@@ -218,12 +220,13 @@
             li.after(newElement);
         },
         getClassesExtra: function (element) {
-            var setting = $(element).closest('.far-admin-groups').data('settings');
-            return setting.classes;
+            return methods.getSettings(element).classes;
         },
         getTemplates: function (element) {
-            var setting = $(element).closest('.far-admin-groups').data('settings');
-            return setting.template;
+            return methods.getSettings(element).template;
+        },
+        getSettings: function (element) {
+            return $(element).closest('.far-admin-groups').data('settings');
         },
         removeElement: function (element) {
             var templates = methods.getTemplates(element.target);
@@ -297,33 +300,33 @@
                 '</li>'
             ).addClass(classes.li_free_element);
         },
-        template_li_new_item: function (elementType, template, classes, hidden) {
+        template_li_new_item: function (elementType, settings, hidden) {
             if(elementType == 1) {
                 return $(
                     '<li class="newElementMaster">' +
-                        methods.getNewElementText(elementType, template)+
+                        methods.getNewElementEntity(elementType, settings)+
                     '</li>'
-                ).addClass(classes.li_master)
+                ).addClass(settings.classes.li_master)
             } else if(elementType == 2) {
                 if (hidden){
                     return $(
                         '<li class="newElement" style="display: none;">' +
-                            methods.getNewElementText(elementType, template)+
+                            methods.getNewElementEntity(elementType, settings)+
                         '</li>'
-                    ).addClass(classes.li_new_element)
+                    ).addClass(settings.classes.li_new_element)
                 } else {
                     return $(
                         '<li class="newElement">' +
-                            methods.getNewElementText(elementType, template)+
+                            methods.getNewElementEntity(elementType, settings)+
                         '</li>'
-                    ).addClass(classes.li_new_element)
+                    ).addClass(settings.classes.li_new_element)
                 }
             } else {
                 return $(
                     '<li class="newElementFree">' +
-                        methods.getNewElementText(elementType, template)+
+                        methods.getNewElementEntity(elementType, settings)+
                     '</li>'
-                ).addClass(classes.li_free_element)
+                ).addClass(settings.classes.li_free_element)
             }
         },
         template_ul: function (idUl) {
@@ -332,20 +335,27 @@
                 '</<ul>'
             );
         },
-        getNewElementText: function (elementType, template){
-            var element = $(template.new_element);
+        getNewElementText: function (elementType, settings){
+            var text = '';
 
             switch (elementType) {
                 case 1:
-                    element.text(template.li_master_text);
+                    text = settings.text_new.li_master_text;
                     break;
                 case 2:
-                    element.text(template.li_element_text);
+                    text = settings.text_new.li_element_text;
                     break;
                 case 3:
-                    element.text(template.li_free_element_text);
+                    text = settings.text_new.li_free_element_text;
                     break;
             }
+            return text;
+        },
+        getNewElementEntity: function (elementType, settings){
+            var element = $(settings.template.new_element);
+
+            element.text(methods.getNewElementText(elementType, settings));
+
             return element.wrap('<p/>').parent().html();
         },
         createElements: function (settings, ulClass, listType) {
@@ -369,10 +379,13 @@
                     methods.template_li_free(val, templates, classes_extra).appendTo(ulElement);
                 }
             });
-            if(listType == 2) {
-                methods.template_li_new_item(listType, templates, classes_extra, true).appendTo(ulElement);
-            } else {
-                methods.template_li_new_item(listType, templates, classes_extra, false).appendTo(ulElement);
+
+            if(methods.getNewElementText(listType, settings) != '') {
+                if(listType == 2) {
+                    methods.template_li_new_item(listType, settings, true).appendTo(ulElement);
+                } else {
+                    methods.template_li_new_item(listType, settings, false).appendTo(ulElement);
+                }
             }
         },
         clearElements: function (settings, ulClass) {
@@ -471,15 +484,17 @@
             'edit_element': '<span class="fa fa-pencil far_display-edit"></span>',
             'close_element': '<span class="fa fa-times far_display-close close-element"></span>',
             'assign_element': '<span class="fa fa-tag far_display-tag"></span>',
-            'li_master_text': 'New element',
-            'li_element_text': 'New element',
-            'li_free_element_text': 'New FREE element'
         },
         'classes': { // LI custom classes
             'li_master': '',
             'li_element': '',
             'li_free_element': '',
             'li_new_element': ''
+        },
+        'text_new': { // Text New Elements
+            'li_master_text': 'New element',
+            'li_element_text': 'New element',
+            'li_free_element_text': 'New FREE element'
         },
         'values': {
             "far_master_elements": [

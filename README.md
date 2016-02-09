@@ -46,6 +46,9 @@ uses to display the "New element" option.
         'li_element': '',
         'li_free_element': '',
         'li_new_element': '',
+    };
+
+    $.fn.adminGroupLists.defaults.text_new = {
         'li_master_text': 'New element',
         'li_element_text': 'New element',
         'li_free_element_text': 'New FREE element'
@@ -58,7 +61,20 @@ uses to display the "New element" option.
         'li_element': 'hvr-fade',
         'li_free_element': 'hvr-fade',
         'li_new_element': 'hvr-fade',
+    };
+    
+    $.fn.adminGroupLists.defaults.text_new = {
         'li_master_text': 'New element',
+        'li_element_text': 'New element',
+        'li_free_element_text': 'New FREE element'
+    };
+```
+
+If you want to disable the "New element", you only have to pass the text without value. 
+
+```
+    $.fn.adminGroupLists.defaults.text_new = {
+        'li_master_text': '',
         'li_element_text': 'New element',
         'li_free_element_text': 'New FREE element'
     };
