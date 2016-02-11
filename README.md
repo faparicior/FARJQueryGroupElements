@@ -104,6 +104,21 @@ If you want to disable the "New element", you only have to pass the text without
     };
 ```
 
+Create, edit or delete elements behaviour
+-----------------------------------------
+
+You can enable or disable with creation, edit or deletion with:
+
+```javascript
+    $.fn.adminGroupLists.defaults.behaviour = {
+        'li_master_editable': true,
+        'li_master_removable': true,
+        'li_element_editable': true,
+        'li_element_removable': true,
+        'li_free_element_editable': true,
+        'li_free_element_removable': true
+    };
+```
 
 Initialization
 --------------

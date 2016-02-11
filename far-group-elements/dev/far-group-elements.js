@@ -25,9 +25,9 @@
                 methods.clearElements(settings, 'far_elements');
                 methods.clearElements(settings, 'far_free_elements');
 
-                methods.createElements(settings, 'far_master_elements', 1);
-                methods.createElements(settings, 'far_elements', 2);
-                methods.createElements(settings, 'far_free_elements', 3);
+                methods.createElements(settings, 'far_master_elements', 'master');
+                methods.createElements(settings, 'far_elements', 'element');
+                methods.createElements(settings, 'far_free_elements', 'free_element');
 
                 var ulWatcher = settings.$content_el.find('ul');
                 var masterWatcher = ulWatcher.filter('.far_master_elements');
@@ -94,7 +94,9 @@
                 li_child_newelement.show();
             }
             */
-            li_child_newelement.show();
+            if (li_child_newelement.text() != '') {
+                li_child_newelement.show();
+            }
         },
         elementsSelected: function () {
             var li = $(this);
@@ -134,26 +136,30 @@
         uneditElement: function () {
             $(this).attr('contenteditable', 'false');
         },
-        assignElement: function () {
+        assignElement: function (element) {
+            var settings = methods.getSettings(element.target);
+
             var li = $(this).closest('li');
+            methods.clearBehaviour(li);
+            methods.addBehaviour('element', li, settings);
+
             var div = li.closest('.far-admin-groups');
             var idMaster = div.find('.far_master_elements').attr('data-id-selected');
 
             if(idMaster) {
-                var element = li.detach();
+                var element_li = li.detach();
 
-                element.find('.far_display-tag').remove();
-                element.attr('data-relid', idMaster);
-                div.find('.far_elements').find('.newElement').closest('li').before(element);
+                element_li.find('.far_display-tag').remove();
+                element_li.attr('data-relid', idMaster);
+                div.find('.far_elements').find('.newElement').closest('li').before(element_li);
             }
         },
         newElementMaster: function (element) {
             var settings = methods.getSettings(element.target);
-            var templates = settings.template;
 
-            var newElement = methods.template_li_new_item(1, settings, false);
-            var newEdit = $(templates.edit_element);
-            var newClose = $(templates.close_element);
+            var newElement = methods.template_li_new_item('master', settings, false);
+            var newBehaviour = $(methods.getBehaviourTemplate('master', settings));
+
             var uid_data = methods.generateUUID();
 
             var li = $(this).closest('li');
@@ -165,18 +171,15 @@
             li.attr('data-status','new');
             ul.attr('data-id-selected', uid_data);
 
-            span.after(newClose);
-            span.after(newEdit);
+            span.after(newBehaviour);
             methods.selectText(span);
             li.after(newElement);
         },
         newElement: function (element) {
             var settings = methods.getSettings(element.target);
-            var templates = settings.template;
 
-            var newElement = methods.template_li_new_item(2, settings, false);
-            var newEdit = $(templates.edit_element);
-            var newClose = $(templates.close_element);
+            var newElement = methods.template_li_new_item('element', settings, false);
+            var newBehaviour = $(methods.getBehaviourTemplate('element', settings));
             var uid_data = methods.generateUUID();
 
             var li = $(this).closest('li');
@@ -191,8 +194,7 @@
             var idMaster = ul_master.attr('data-id-selected');
             li.attr('data-relid', idMaster);
 
-            span.after(newClose);
-            span.after(newEdit);
+            span.after(newBehaviour);
             methods.selectText(span);
             span.closest('li').after(newElement);
         },
@@ -200,9 +202,8 @@
             var settings = methods.getSettings(element.target);
             var templates = settings.template;
 
-            var newElement = methods.template_li_new_item(3, settings, false);
-            var newEdit = $(templates.edit_element);
-            var newClose = $(templates.close_element);
+            var newElement = methods.template_li_new_item('free_element', settings, false);
+            var newBehaviour = $(methods.getBehaviourTemplate('free_element', settings));
             var newAssign = $(templates.assign_element);
             var uid_data = methods.generateUUID();
 
@@ -214,13 +215,9 @@
             $(this).attr('data-status','new');
 
             span.before(newAssign);
-            span.after(newClose);
-            span.after(newEdit);
+            span.after(newBehaviour);
             methods.selectText(span);
             li.after(newElement);
-        },
-        getClassesExtra: function (element) {
-            return methods.getSettings(element).classes;
         },
         getTemplates: function (element) {
             return methods.getSettings(element).template;
@@ -229,12 +226,16 @@
             return $(element).closest('.far-admin-groups').data('settings');
         },
         removeElement: function (element) {
-            var templates = methods.getTemplates(element.target);
+            var settings = methods.getSettings(element.target);
+            var templates = settings.template;
 
             var li = $(this).closest('li');
             var div = li.closest('.far-admin-groups');
             var li_element = li.detach();
             var newAssign = $(templates.assign_element);
+
+            methods.clearBehaviour(li);
+            methods.addBehaviour('free_element', li, settings);
 
             li_element.find('.far_display').removeAttr('data-relid');
             li_element.find('.far_display').before(newAssign);
@@ -244,7 +245,8 @@
             $(this).closest('li').remove();
         },
         removeMasterElement: function (element) {
-            var templates = methods.getTemplates(element.target);
+            var settings = methods.getSettings(element.target);
+            var templates = settings.template;
 
             var li_master = $(this).closest('li');
             var id = li_master.attr('data-uid');
@@ -257,6 +259,9 @@
             var li_child_elements = li_child.filter('[data-relid = "' + id + '"]');
             var li_child_newelement = li_child.filter('.newElement');
             var ul_free_elements = div.find('.far_free_elements');
+
+            methods.clearBehaviour(li_child_elements);
+            methods.addBehaviour('free_element', li_child_elements, settings);
 
             li_child_elements.prepend($(templates.assign_element));
             li_child_elements.show();
@@ -272,62 +277,68 @@
             //li_child_newelement.attr('data-eventhide', 'true');
             li_master.remove();
         },
-        template_li_master: function (values, templates, classes) {
+        clearBehaviour: function (li_elements) {
+            li_elements.find('span').filter('.far_display-edit').detach();
+            li_elements.find('span').filter('.far_display-close').detach();
+            li_elements.find('span').filter('.far_display-tag').detach();
+        },
+        addBehaviour: function (type, li_elements, settings) {
+            var elements = $(methods.getBehaviourTemplate(type, settings));
+
+            li_elements.find('span').after(elements);
+        },
+        template_li_master: function (values, settings) {
             return $(
                 '<li data-uid="' + values.id + '">' +
                     '<span class="far_display" " contenteditable="false">' + values.desc + '</span>' +
-                    templates.edit_element +
-                    templates.close_element +
+                    methods.getBehaviourTemplate('master', settings) +
                 '</li>'
-            ).addClass(classes.li_master);
+            ).addClass(settings.classes.li_master);
         },
-        template_li: function (values, templates, classes) {
+        template_li: function (values, settings) {
             return $(
                 '<li data-uid="' + values.id + '" data-relid="' + values.relId + '" style="display: none;">' +
-                '<span class="far_display" contenteditable="false">' + values.desc + '</span>' +
-                templates.edit_element +
-                templates.close_element +
+                    '<span class="far_display" contenteditable="false">' + values.desc + '</span>' +
+                    methods.getBehaviourTemplate('element', settings) +
                 '</li>'
-            ).addClass(classes.li_element);
+            ).addClass(settings.classes.li_element);
         },
-        template_li_free: function (values, templates, classes) {
+        template_li_free: function (values, settings) {
             return $(
                 '<li data-uid="' + values.id + '">' +
-                    templates.assign_element +
+                    settings.template.assign_element +
                     '<span class="far_display" contenteditable="false">' + values.desc + '</span>' +
-                    templates.edit_element +
-                    templates.close_element +
+                    methods.getBehaviourTemplate('free_element', settings) +
                 '</li>'
-            ).addClass(classes.li_free_element);
+            ).addClass(settings.classes.li_free_element);
         },
         template_li_new_item: function (elementType, settings, hidden) {
-            if(elementType == 1) {
-                return $(
+            var element = '';
+
+            if(elementType == 'master') {
+                element = $(
                     '<li class="newElementMaster">' +
                         methods.getNewElementEntity(elementType, settings)+
                     '</li>'
-                ).addClass(settings.classes.li_master)
-            } else if(elementType == 2) {
-                if (hidden){
-                    return $(
-                        '<li class="newElement" style="display: none;">' +
-                            methods.getNewElementEntity(elementType, settings)+
-                        '</li>'
-                    ).addClass(settings.classes.li_new_element)
-                } else {
-                    return $(
+                ).addClass(settings.classes.li_master);
+            } else if(elementType == 'element') {
+                element = $(
                         '<li class="newElement">' +
                             methods.getNewElementEntity(elementType, settings)+
                         '</li>'
-                    ).addClass(settings.classes.li_new_element)
-                }
+                    ).addClass(settings.classes.li_new_element);
             } else {
-                return $(
+                element = $(
                     '<li class="newElementFree">' +
                         methods.getNewElementEntity(elementType, settings)+
                     '</li>'
-                ).addClass(settings.classes.li_free_element)
+                ).addClass(settings.classes.li_free_element);
             }
+            if(hidden) {
+                element.hide();
+            }
+
+            return element;
         },
         template_ul: function (idUl) {
             return $(
@@ -335,17 +346,51 @@
                 '</<ul>'
             );
         },
+        getBehaviourTemplate: function (type, settings){
+            var editable = false;
+            var removable = false;
+
+            switch (type)
+            {
+                case 'master':
+                    editable = settings.behaviour.li_master_editable;
+                    removable = settings.behaviour.li_master_removable;
+                    break;
+                case 'element':
+                    editable = settings.behaviour.li_element_editable;
+                    removable = settings.behaviour.li_element_removable;
+                    break;
+                case 'free_element':
+                    editable = settings.behaviour.li_free_element_editable;
+                    removable = settings.behaviour.li_free_element_removable;
+                    break;
+            }
+
+            return methods.getBehaviour(editable, removable, settings.template);
+        },
+        getBehaviour: function (editable, removable, template){
+            var objects = '';
+
+            if(editable) {
+                objects += template.edit_element;
+            }
+            if(removable) {
+                objects += template.close_element;
+            }
+
+            return objects;
+        },
         getNewElementText: function (elementType, settings){
             var text = '';
 
             switch (elementType) {
-                case 1:
+                case 'master':
                     text = settings.text_new.li_master_text;
                     break;
-                case 2:
+                case 'element':
                     text = settings.text_new.li_element_text;
                     break;
-                case 3:
+                case 'free_element':
                     text = settings.text_new.li_free_element_text;
                     break;
             }
@@ -359,8 +404,6 @@
             return element.wrap('<p/>').parent().html();
         },
         createElements: function (settings, ulClass, listType) {
-            var classes_extra = settings.classes;
-            var templates = settings.template;
             var obj = settings.values[ulClass];
 
             var ulElement = settings.$content_el.find('.' + ulClass);
@@ -371,22 +414,25 @@
             }
 
             $.each(obj, function (i, val) {
-                if(listType == 1) {
-                    methods.template_li_master(val, templates, classes_extra).appendTo(ulElement);
-                } else if(listType == 2) {
-                    methods.template_li(val, templates, classes_extra).appendTo(ulElement);
+                if(listType == 'master') {
+                    methods.template_li_master(val, settings).appendTo(ulElement);
+                } else if(listType == 'element') {
+                    methods.template_li(val, settings).appendTo(ulElement);
                 } else {
-                    methods.template_li_free(val, templates, classes_extra).appendTo(ulElement);
+                    methods.template_li_free(val, settings).appendTo(ulElement);
                 }
             });
 
-            if(methods.getNewElementText(listType, settings) != '') {
-                if(listType == 2) {
-                    methods.template_li_new_item(listType, settings, true).appendTo(ulElement);
-                } else {
-                    methods.template_li_new_item(listType, settings, false).appendTo(ulElement);
-                }
+            var newItem = methods.getBehaviourNewItem(listType, settings);
+            if(listType == 'element') {
+                newItem.hide();
             }
+            newItem.appendTo(ulElement);
+        },
+        getBehaviourNewItem: function (listType, settings) {
+            var evalNewItem = (methods.getNewElementText(listType, settings) == '');
+
+            return methods.template_li_new_item(listType, settings, evalNewItem);
         },
         clearElements: function (settings, ulClass) {
             var liElements = settings.$content_el.find('.' + ulClass).find('li');
@@ -495,6 +541,14 @@
             'li_master_text': 'New element',
             'li_element_text': 'New element',
             'li_free_element_text': 'New FREE element'
+        },
+        'behaviour': {
+            'li_master_editable': true,
+            'li_master_removable': true,
+            'li_element_editable': true,
+            'li_element_removable': true,
+            'li_free_element_editable': true,
+            'li_free_element_removable': true
         },
         'values': {
             "far_master_elements": [
