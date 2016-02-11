@@ -39,7 +39,12 @@
 
 .far-admin-groups ul li span.far_display-edit {
     padding-left: 10px;
-    width: 30px;
+    width: 20px;
+}
+
+.far-admin-groups ul li span.far_display-close {
+    padding-left: 10px;
+    width: 20px;
 }
 
 .far-admin-groups ul li.elementSelected {
@@ -53,4 +58,6 @@
 .box {
     text-align: center;
     width: 300px;
+    max-height: 200px;
+    overflow-y: auto;
 }
