@@ -2,6 +2,6 @@ language: node_js
 node_js:
   - '0.12'
 sudo: required
-before_script:
-  - sudo npm install -g intern
+install:
+  - npm install -g intern
 script: node_modules/.bin/intern-runner config=tests/intern
