@@ -20,9 +20,9 @@ define({
 //		{ browserName: 'internet explorer', version: '11', platform: 'WIN8' },
 //		{ browserName: 'internet explorer', version: '10', platform: 'WIN8' },
 //		{ browserName: 'internet explorer', version: '9', platform: 'WINDOWS' },
-//		{ browserName: 'firefox', version: '37', platform: [ 'WINDOWS', 'MAC' ] },
+		{ browserName: 'firefox', version: '37', platform: [ 'WINDOWS', 'MAC', 'LINUX' ] },
 //		{ browserName: 'chrome', version: '39', platform: [ 'WINDOWS', 'MAC', 'LINUX' ] },
-        { browserName: 'chrome', version: '39', platform: [ 'LINUX' ] },
+//        { browserName: 'chrome', version: '39', platform: [ 'LINUX' ] },
 //		{ browserName: 'safari', version: '8', platform: 'MAC' }
 	],
 
