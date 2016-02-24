@@ -42,7 +42,7 @@ define([
                     });
             },
             'Init Ok Master CloseSpan': function () {
-                return findSpanByClass (indexPage, 'demo', 'far_master_elements', 'fa-times')
+                return findAllSpanByClass (indexPage, 'demo', 'far_master_elements', 'fa-times')
                     .getVisibleText()
                     .then(function (children) {
                         assert.equal(children.length, 3);
@@ -52,7 +52,7 @@ define([
                     });
             },
             'Init Ok Master EditSpan': function () {
-                return findSpanByClass (indexPage, 'demo', 'far_master_elements', 'fa-pencil')
+                return findAllSpanByClass (indexPage, 'demo', 'far_master_elements', 'fa-pencil')
                     .getVisibleText()
                     .then(function (children) {
                         assert.equal(children.length, 3);
@@ -62,7 +62,7 @@ define([
                     });
             },
             'Init Ok Elements CloseSpan': function () {
-                return findSpanByClass (indexPage, 'demo', 'far_elements', 'fa-times')
+                return findAllSpanByClass (indexPage, 'demo', 'far_elements', 'fa-times')
                     .getVisibleText()
                     .then(function (children) {
                         assert.equal(children.length, 3);
@@ -72,7 +72,7 @@ define([
                     });
             },
             'Init Ok Elements EditSpan': function () {
-                return findSpanByClass (indexPage, 'demo', 'far_elements', 'fa-pencil')
+                return findAllSpanByClass (indexPage, 'demo', 'far_elements', 'fa-pencil')
                     .getVisibleText()
                     .then(function (children) {
                         assert.equal(children.length, 3);
@@ -82,7 +82,7 @@ define([
                     });
             },
             'Init Ok Free Elements CloseSpan': function () {
-                return findSpanByClass (indexPage, 'demo', 'far_free_elements', 'fa-times')
+                return findAllSpanByClass (indexPage, 'demo', 'far_free_elements', 'fa-times')
                     .getVisibleText()
                     .then(function (children) {
                         assert.equal(children.length, 3);
@@ -92,7 +92,7 @@ define([
                     });
             },
             'Init Ok Free Elements EditSpan': function () {
-                return findSpanByClass (indexPage, 'demo', 'far_free_elements', 'fa-pencil')
+                return findAllSpanByClass (indexPage, 'demo', 'far_free_elements', 'fa-pencil')
                     .getVisibleText()
                     .then(function (children) {
                         assert.equal(children.length, 3);
@@ -102,7 +102,7 @@ define([
                     });
             },
             'Init Ok Free Elements TagSpan': function () {
-                return findSpanByClass (indexPage, 'demo', 'far_free_elements', 'fa-tag')
+                return findAllSpanByClass (indexPage, 'demo', 'far_free_elements', 'fa-tag')
                     .getVisibleText()
                     .then(function (children) {
                         assert.equal(children.length, 3);
@@ -219,6 +219,56 @@ define([
                         console.error(error);
                         return false;
                     });
+            },
+            'Delete Master element Markets': function () {
+                return indexPage
+                    .init()
+                    .findById('demo')
+                    .findByClassName('far_master_elements')
+                    .findByClassName('fa-times')
+                    .click()
+                .end()
+                    .findAllByXpath('//div[@id="demo"]/div/ul[@class="far_free_elements"]/li')
+                    .getVisibleText()
+                .then(function (children) {
+                    verifyFreeElementsPlusMarketsElements(children);
+                }, function (error) {
+                    console.error(error);
+                    return false;
+                });
+            },
+            'Delete element from Professional Services': function () {
+                return indexPage
+                    .init()
+                    .findByXpath('//div[@id="demo"]/div/ul[@class="far_master_elements"]/li[@data-uid="4"]')
+                    .click()
+                .end()
+                    .findByXpath('//div[@id="demo"]/div/ul[@class="far_elements"]/li[@data-uid="5"]/span[3]')
+                    .click()
+                .end()
+                    .findAllByXpath('//div[@id="demo"]/div/ul[@class="far_free_elements"]/li')
+                    .getVisibleText()
+                .then(function (children) {
+                    verifyFreeElementsPlusProfessionalServicesElements(children);
+                }, function (error) {
+                    console.error(error);
+                    return false;
+                });
+            },
+            'Delete Free element': function () {
+                return indexPage
+                    .init()
+                    .findByXpath('//div[@id="demo"]/div/ul[@class="far_free_elements"]/li[@data-uid="7"]/span[4]')
+                    .click()
+                    .end()
+                    .findAllByXpath('//div[@id="demo"]/div/ul[@class="far_free_elements"]/li')
+                    .getVisibleText()
+                    .then(function (children) {
+                        verifyFreeElementsMinusPharmacyElement(children);
+                    }, function (error) {
+                        console.error(error);
+                        return false;
+                    });
             }
         };
     });
@@ -243,12 +293,18 @@ define([
             .findAllByTagName('li')
     }
 
-    function findSpanByClass (page, id, classText, classSpan) {
+    function findAllSpanByClass (page, id, classText, classSpan) {
         return page
             .init()
             .findById(id)
             .findByClassName(classText)
             .findAllByClassName(classSpan)
+    }
+
+    function findSpanByClass (page, id, classText, classSpan) {
+        return page
+            .init()
+            .findByXpath('//div[@id="' + id + '"]/div/ul[@class="' + classText + '"]/li/span[@class="' + classSpan + '"]')
     }
 
     function findSpanByText (page, div, text) {
@@ -319,6 +375,24 @@ define([
 
     function verifyFreeElements(elements) {
         var elementsExpected = ['Pharmacy', 'Optics', 'Shoes', 'New FREE element'];
+
+        return assert.deepEqual(elements, elementsExpected);
+    }
+
+    function verifyFreeElementsPlusMarketsElements(elements) {
+        var elementsExpected = ['Pharmacy', 'Optics', 'Shoes', 'Supermarket', 'Fruit Store', 'New FREE element'];
+
+        return assert.deepEqual(elements, elementsExpected);
+    }
+
+    function verifyFreeElementsPlusProfessionalServicesElements(elements) {
+        var elementsExpected = ['Pharmacy', 'Optics', 'Shoes', 'Hardware', 'New FREE element'];
+
+        return assert.deepEqual(elements, elementsExpected);
+    }
+
+    function verifyFreeElementsMinusPharmacyElement(elements) {
+        var elementsExpected = ['Optics', 'Shoes', 'New FREE element'];
 
         return assert.deepEqual(elements, elementsExpected);
     }
