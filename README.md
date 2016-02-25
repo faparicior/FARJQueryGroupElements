@@ -1,5 +1,4 @@
-FARGroupElements
-================
+# FARGroupElements [![Build Status](https://travis-ci.org/faparicior/FARJQueryGroupElements.svg?branch=master)](https://travis-ci.org/faparicior/FARJQueryGroupElements)
 
 This JQuery plugin provides a functionality to administer a master 
 list of elements with a child list of elements.
