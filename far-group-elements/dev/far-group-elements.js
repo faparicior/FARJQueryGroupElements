@@ -457,6 +457,9 @@
                 var element = {};
                 element.id = $(this).attr('data-uid');
                 element.desc = $(this).find('.far_display').text();
+                if (groupElements == '.far_elements') {
+                    element.relId = $(this).attr('data-relid');
+                }
                 element.status = $(this).attr('data-status');
                 master.push(element);
             });
