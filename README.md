@@ -110,6 +110,7 @@ You can enable or disable with creation, edit or deletion with:
 
 ```javascript
     $.fn.adminGroupLists.defaults.behaviour = {
+        'li_master_standalone': false,
         'li_master_editable': true,
         'li_master_removable': true,
         'li_element_editable': true,
@@ -118,6 +119,11 @@ You can enable or disable with creation, edit or deletion with:
         'li_free_element_removable': true
     };
 ```
+
+li_master_standalone option
+---------------------------
+
+If 'li_master_standalone' is set to false, the plugin only use 'li_master' list. Omitting 'li_element' and 'li_free_element' lists.
 
 Initialization
 --------------

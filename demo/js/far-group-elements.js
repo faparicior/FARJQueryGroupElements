@@ -26,21 +26,27 @@
                 methods.clearElements(settings, 'far_free_elements');
 
                 methods.createElements(settings, 'far_master_elements', 'master');
-                methods.createElements(settings, 'far_elements', 'element');
-                methods.createElements(settings, 'far_free_elements', 'free_element');
+
+                if (settings.behaviour['li_master_standalone'] == false) {
+                    methods.createElements(settings, 'far_elements', 'element');
+                    methods.createElements(settings, 'far_free_elements', 'free_element');
+                }
 
                 var ulWatcher = settings.$content_el.find('ul');
                 var masterWatcher = ulWatcher.filter('.far_master_elements');
-                var elementsWatcher = ulWatcher.filter('.far_elements');
-                var freeElementsWatcher = ulWatcher.filter('.far_free_elements');
-
+                if (settings.behaviour['li_master_standalone'] == false) {
+                    var elementsWatcher = ulWatcher.filter('.far_elements');
+                    var freeElementsWatcher = ulWatcher.filter('.far_free_elements');
+                }
                 // Status elements ('normal', 'new', 'updated')
                 ulWatcher.find('li').attr('data-status','normal');
 
                 // Disable event watcher to reengage.
                 masterWatcher.off('click', '.newElementMaster');
-                elementsWatcher.off('click', '.newElement');
-                freeElementsWatcher.off('click', '.newElementFree');
+                if (settings.behaviour['li_master_standalone'] == false) {
+                    elementsWatcher.off('click', '.newElement');
+                    freeElementsWatcher.off('click', '.newElementFree');
+                }
 
                 //
                 // Event methods
@@ -50,8 +56,6 @@
                 ulWatcher.on('keyup', '.far_display', methods.interceptEscKeys);
                 // Selected element
                 masterWatcher.on('click', 'li' , methods.masterSelected);
-                elementsWatcher.on('click', 'li' , methods.elementsSelected);
-                freeElementsWatcher.on('click', 'li' , methods.freeElementsSelected);
                 // Select child categories from master
                 masterWatcher.on('click focus', 'li', methods.selectChildCategories);
                 // Edit element
@@ -59,18 +63,22 @@
                 ulWatcher.on('focusout', '.far_display', methods.uneditElement);
                 // New element Master
                 masterWatcher.on('click', '.newElementMaster', methods.newElementMaster);
-                // New element
-                elementsWatcher.on('click', '.newElement', methods.newElement);
-                // New free element
-                freeElementsWatcher.on('click', '.newElementFree', methods.newFreeElement);
-                // Tagged free element
-                freeElementsWatcher.on('click', '.far_display-tag', methods.assignElement);
                 // Remove group categories
                 masterWatcher.on('click', '.close-element', methods.removeMasterElement);
-                // Remove element
-                elementsWatcher.on('click', '.close-element', methods.removeElement);
-                // Remove free categories
-                freeElementsWatcher.on('click', '.close-element', methods.removeFreeElement);
+                if (settings.behaviour['li_master_standalone'] == false) {
+                    elementsWatcher.on('click', 'li', methods.elementsSelected);
+                    freeElementsWatcher.on('click', 'li', methods.freeElementsSelected);
+                    // New element
+                    elementsWatcher.on('click', '.newElement', methods.newElement);
+                    // New free element
+                    freeElementsWatcher.on('click', '.newElementFree', methods.newFreeElement);
+                    // Tagged free element
+                    freeElementsWatcher.on('click', '.far_display-tag', methods.assignElement);
+                    // Remove element
+                    elementsWatcher.on('click', '.close-element', methods.removeElement);
+                    // Remove free categories
+                    freeElementsWatcher.on('click', '.close-element', methods.removeFreeElement);
+                }
             });
         },
         masterSelected: function () {
@@ -543,6 +551,7 @@
             'li_free_element_text': 'New FREE element'
         },
         'behaviour': {
+            'li_master_standalone': false,
             'li_master_editable': true,
             'li_master_removable': true,
             'li_element_editable': true,

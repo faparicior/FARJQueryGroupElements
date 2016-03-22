@@ -79,6 +79,7 @@
             };
 
             $.fn.adminGroupLists.defaults.behaviour = {
+                'li_master_standalone': false,
                 'li_master_editable': true,
                 'li_master_removable': true,
                 'li_element_editable': true,
@@ -138,14 +139,10 @@
             };
 
             $.fn.adminGroupLists.defaults.behaviour = {
-                'li_master_editable': false,
-                'li_master_removable': false,
-                'li_element_editable': true,
-                'li_element_removable': true,
-                'li_free_element_editable': false,
-                'li_free_element_removable': false
+                'li_master_standalone': true,
+                'li_master_editable': true,
+                'li_master_removable': true
             };
-
 
             $('#demo2').adminGroupLists('init');
         });
